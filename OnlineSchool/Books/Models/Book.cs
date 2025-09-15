@@ -8,11 +8,11 @@ namespace OnlineSchool.Books.Models
     public class Book
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public string Id { get; set; }
 
         [ForeignKey("IdStudent")]
-        public int IdStudent { get; set; }
+        public string IdStudent { get; set; }
 
         [JsonIgnore]
         public virtual Student Student { get; set; }

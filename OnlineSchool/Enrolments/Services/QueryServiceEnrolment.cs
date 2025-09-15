@@ -18,17 +18,17 @@ namespace OnlineSchool.Enrolments.Services
 
         public async Task<List<Enrolment>> GetAll()
         {
-            var enrolment = await _repository.GetAllAsync();
+            var enrolments = await _repository.GetAllAsync();
 
-            if (enrolment.Count() == 0)
+            if (!enrolments.Any())
             {
                 throw new ItemsDoNotExist(Constants.ItemsDoNotExist);
             }
 
-            return enrolment;
+            return enrolments;
         }
 
-        public async Task<Enrolment> GetById(int id)
+        public async Task<Enrolment> GetById(string id)
         {
             var enrolment = await _repository.GetByIdAsync(id);
 

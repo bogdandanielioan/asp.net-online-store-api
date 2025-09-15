@@ -21,12 +21,12 @@ namespace OnlineSchool.Students.Controllers.interfaces
         [HttpGet("studentCard")]
         [ProducesResponseType(statusCode: 200, type: typeof(List<Student>))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<StudentCard>> GetStudentCard([FromQuery]int id);
+        public abstract Task<ActionResult<StudentCard>> GetStudentCard([FromQuery]string id);
 
         [HttpGet("findById")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<DtoStudentView>> GetById([FromQuery] int id);
+        public abstract Task<ActionResult<DtoStudentView>> GetById([FromQuery] string id);
 
         [HttpGet("findByName")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
@@ -42,39 +42,39 @@ namespace OnlineSchool.Students.Controllers.interfaces
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> UpdateStudent([FromQuery] int id, UpdateRequestStudent request);
+        public abstract Task<ActionResult<Student>> UpdateStudent([FromQuery] string id, UpdateRequestStudent request);
 
         [HttpDelete("deleteStudent")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> DeleteStudent([FromQuery] int id);
+        public abstract Task<ActionResult<Student>> DeleteStudent([FromQuery] string id);
 
 
         [HttpPost("createBookForStudent")]
         [ProducesResponseType(statusCode: 201, type: typeof(Student))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> CreateBookForStudent([FromQuery]int idStudent,BookCreateDTO request);
+        public abstract Task<ActionResult<Student>> CreateBookForStudent([FromQuery]string idStudent,BookCreateDTO request);
 
         [HttpPut("updateBookForStudent")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> UpdateBookForStudent([FromQuery] int idStudent, [FromQuery] int idBook, BookUpdateDTO request);
+        public abstract Task<ActionResult<Student>> UpdateBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook, BookUpdateDTO request);
 
         [HttpDelete("deleteBookForStudent")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> DeleteBookForStudent([FromQuery] int idStudent, [FromQuery] int idBook);
+        public abstract Task<ActionResult<Student>> DeleteBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook);
 
         [HttpPost("enrollmentCourse")]
         [ProducesResponseType(statusCode: 201, type: typeof(Student))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> EnrollmentCourse([FromQuery] int idStudent,[FromQuery]string name);
+        public abstract Task<ActionResult<Student>> EnrollmentCourse([FromQuery] string idStudent,[FromQuery]string name);
 
         [HttpDelete("unenrollmentCourse")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> UnEnrollmentCourse([FromQuery] int idStudent, [FromQuery] string name);
+        public abstract Task<ActionResult<Student>> UnEnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name);
 
 
     }

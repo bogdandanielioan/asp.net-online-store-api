@@ -6,7 +6,7 @@ namespace OnlineSchool.StudentCards.Repository.interfaces
     {
         Task<List<StudentCard>> GetAllAsync();
 
-        Task<StudentCard> GetByIdAsync(int id);
+        Task<StudentCard> GetByIdAsync(string id);
 
         Task<StudentCard> GetByNameAsync(string name);
 

@@ -51,7 +51,7 @@ namespace OnlineSchool.StudentCards.Controllers
 
         }
 
-        public override async Task<ActionResult<StudentCard>> GetById([FromQuery] int id)
+        public override async Task<ActionResult<StudentCard>> GetById([FromQuery] string id)
         {
 
             try

@@ -10,8 +10,8 @@ namespace OnlineSchool.Courses.Services.interfaces
 
         Task<Course> Create(CreateRequestCourse request);
 
-        Task<Course> Update(int id, UpdateRequestCourse request);
+        Task<Course> Update(string id, UpdateRequestCourse request);
 
-        Task<Course> Delete(int id);
+        Task<Course> Delete(string id);
     }
 }

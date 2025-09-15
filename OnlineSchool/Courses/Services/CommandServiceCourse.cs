@@ -28,7 +28,7 @@ namespace OnlineSchool.Courses.Services
             return course;
         }
 
-        public async Task<Course> Update(int id, UpdateRequestCourse request)
+        public async Task<Course> Update(string id, UpdateRequestCourse request)
         {
 
             var course = await _repository.GetById(id);
@@ -46,7 +46,7 @@ namespace OnlineSchool.Courses.Services
             return course;
         }
 
-        public async Task<Course> Delete(int id)
+        public async Task<Course> Delete(string id)
         {
 
             var course = await _repository.GetById(id);

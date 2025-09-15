@@ -10,18 +10,17 @@ namespace OnlineSchool.Enrolments.Models
     {
 
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public string Id { get; set; }
 
         [ForeignKey("IdCourse")]
-        public int IdCourse { get; set; }
+        public string IdCourse { get; set; }
 
         [JsonIgnore]
         public virtual Course Course { get; set; }
 
         [ForeignKey("IdStudent")]
-        public int IdStudent { get; set; }
+        public string IdStudent { get; set; }
 
         [JsonIgnore]
         public virtual Student Student { get; set; }

@@ -17,7 +17,7 @@ namespace OnlineSchool.StudentCards.Controllers.interfaces
         [HttpGet("findById")]
         [ProducesResponseType(statusCode: 200, type: typeof(StudentCard))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<StudentCard>> GetById([FromQuery] int id);
+        public abstract Task<ActionResult<StudentCard>> GetById([FromQuery] string id);
 
         [HttpGet("findByName")]
         [ProducesResponseType(statusCode: 200, type: typeof(StudentCard))]

@@ -21,14 +21,14 @@ namespace OnlineSchool.Students.Services
 
         public async Task<List<DtoStudentView>> GetAll()
         {
-            var student = await _repository.GetAllAsync();
+            var students = await _repository.GetAllAsync();
 
-            if (student.Count() == 0)
+            if (!students.Any())
             {
                 throw new ItemsDoNotExist(Constants.ItemsDoNotExist);
             }
 
-            return student;
+            return students;
         }
 
         public async Task<DtoStudentView> GetByNameAsync(string name)
@@ -42,7 +42,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<DtoStudentView> GetById(int id)
+        public async Task<DtoStudentView> GetById(string id)
         {
             var student = await _repository.GetByIdAsync(id);
 
@@ -54,7 +54,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<StudentCard> CardById(int id)
+        public async Task<StudentCard> CardById(string id)
         {
             var student = await _repository.CardByIdAsync(id);
 

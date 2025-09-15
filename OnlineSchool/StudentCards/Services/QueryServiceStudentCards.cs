@@ -17,14 +17,14 @@ namespace OnlineSchool.StudentCards.Services
 
         public async Task<List<StudentCard>> GetAll()
         {
-            var student = await _repository.GetAllAsync();
+            var cards = await _repository.GetAllAsync();
 
-            if (student.Count() == 0)
+            if (!cards.Any())
             {
                 throw new ItemsDoNotExist(Constants.ItemsDoNotExist);
             }
 
-            return student;
+            return cards;
         }
 
         public async Task<StudentCard> GetByNameAsync(string name)
@@ -39,7 +39,7 @@ namespace OnlineSchool.StudentCards.Services
             return student;
         }
 
-        public async Task<StudentCard> GetById(int id)
+        public async Task<StudentCard> GetById(string id)
         {
             var student = await _repository.GetByIdAsync(id);
 

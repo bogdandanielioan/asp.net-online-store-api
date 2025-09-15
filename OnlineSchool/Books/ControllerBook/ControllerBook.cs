@@ -31,7 +31,7 @@ namespace OnlineSchool.Books.Controllers
                 return NotFound(ex.Message);
             }
         }
-        public override async Task<ActionResult<Book>> GetById([FromQuery] int id)
+        public override async Task<ActionResult<Book>> GetById([FromQuery] string id)
         {
             try
             {

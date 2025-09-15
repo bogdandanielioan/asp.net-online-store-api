@@ -7,7 +7,7 @@ namespace OnlineSchool.Enrolments.Repository.interfaces
     {
 
         Task<List<Enrolment>> GetAllAsync();
-        Task<Enrolment> GetByIdAsync(int id);
+        Task<Enrolment> GetByIdAsync(string id);
 
     }
 }

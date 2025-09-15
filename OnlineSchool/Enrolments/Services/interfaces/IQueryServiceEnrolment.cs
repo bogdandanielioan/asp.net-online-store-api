@@ -6,6 +6,6 @@ namespace OnlineSchool.Enrolments.Services.interfaces
     {
         Task<List<Enrolment>> GetAll();
 
-        Task<Enrolment> GetById(int id);
+        Task<Enrolment> GetById(string id);
     }
 }

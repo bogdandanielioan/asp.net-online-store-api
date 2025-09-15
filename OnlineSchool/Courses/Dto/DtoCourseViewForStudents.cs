@@ -4,8 +4,10 @@ namespace OnlineSchool.Courses.Dto
 {
     public class DtoCourseViewForStudents
     {
-        public string Name { get; set; }
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
-        public string Department { get; set; }
+        [Required]
+        public string Department { get; set; } = string.Empty;
     }
 }

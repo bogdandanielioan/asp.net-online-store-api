@@ -13,15 +13,15 @@ namespace OnlineSchool.Courses.Repository.interfaces
 
         Task<Course> GetByName(string destination);
 
-        Task<DtoCourseView> GetByIdAsync(int id);
+        Task<DtoCourseView> GetByIdAsync(string id);
 
-        Task<Course> GetById(int id);
+        Task<Course> GetById(string id);
 
         Task<Course> Create(CreateRequestCourse request);
 
-        Task<Course> Update(int id, UpdateRequestCourse request);
+        Task<Course> Update(string id, UpdateRequestCourse request);
 
-        Task<Course> DeleteById(int id);
+        Task<Course> DeleteById(string id);
 
     }
 }

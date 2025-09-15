@@ -18,7 +18,7 @@ namespace OnlineSchool.Courses.Controllers.interfaces
         [HttpGet("findById")]
         [ProducesResponseType(statusCode: 200, type: typeof(Course))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<DtoCourseView>> GetById([FromQuery] int id);
+        public abstract Task<ActionResult<DtoCourseView>> GetById([FromQuery] string id);
 
         [HttpGet("findByName")]
         [ProducesResponseType(statusCode: 200, type: typeof(Course))]
@@ -34,12 +34,12 @@ namespace OnlineSchool.Courses.Controllers.interfaces
         [ProducesResponseType(statusCode: 200, type: typeof(Course))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Course>> UpdateCourse([FromQuery] int id, UpdateRequestCourse request);
+        public abstract Task<ActionResult<Course>> UpdateCourse([FromQuery] string id, UpdateRequestCourse request);
 
         [HttpDelete("deleteCourse")]
         [ProducesResponseType(statusCode: 200, type: typeof(Course))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Course>> DeleteCourse([FromQuery] int id);
+        public abstract Task<ActionResult<Course>> DeleteCourse([FromQuery] string id);
 
 
     }

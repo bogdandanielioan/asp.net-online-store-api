@@ -28,7 +28,7 @@ namespace OnlineSchool.Books.Services
             return books;
         }
 
-        public async Task<Book> GetByIdAsync(int id)
+        public async Task<Book> GetByIdAsync(string id)
         {
             var book = await _repo.GetByIdAsync(id);
 

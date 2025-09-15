@@ -8,7 +8,7 @@ namespace OnlineSchool.Books.Repository.interfaces
 
         Task<List<Book>> GetAllAsync();
 
-        Task<Book> GetByIdAsync(int id);
+        Task<Book> GetByIdAsync(string id);
 
         Task<Book> GetByNameAsync(string name);
 

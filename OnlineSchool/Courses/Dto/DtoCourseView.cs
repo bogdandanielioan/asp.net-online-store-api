@@ -1,16 +1,19 @@
-﻿using OnlineSchool.Students.Dto;
+﻿using System.ComponentModel.DataAnnotations;
+using OnlineSchool.Students.Dto;
 
 namespace OnlineSchool.Courses.Dto
 {
     public class DtoCourseView
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
-        public string Name { get; set; }
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
-        public string Department { get; set; }
+        [Required]
+        public string Department { get; set; } = string.Empty;
 
-        public List<DtoStudentViewForCourse> EnrolledStudents { get; set; }
+        public List<DtoStudentViewForCourse> EnrolledStudents { get; set; } = new List<DtoStudentViewForCourse>();
 
     }
 }

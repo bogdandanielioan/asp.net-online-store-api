@@ -17,7 +17,7 @@ namespace OnlineSchool.Books.Controllers.interfaces
         [HttpGet("findById")]
         [ProducesResponseType(statusCode: 200, type: typeof(Book))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Book>> GetById([FromQuery] int id);
+        public abstract Task<ActionResult<Book>> GetById([FromQuery] string id);
 
         [HttpGet("findByName")]
         [ProducesResponseType(statusCode: 200, type: typeof(Book))]

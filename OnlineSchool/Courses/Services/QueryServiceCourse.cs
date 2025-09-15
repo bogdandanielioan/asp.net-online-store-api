@@ -19,14 +19,14 @@ namespace OnlineSchool.Courses.Services
 
         public async Task<List<DtoCourseView>> GetAll()
         {
-            var course = await _repository.GetAllAsync();
+            var courses = await _repository.GetAllAsync();
 
-            if (course.Count() == 0)
+            if (!courses.Any())
             {
                 throw new ItemsDoNotExist(Constants.ItemsDoNotExist);
             }
 
-            return course;
+            return courses;
         }
 
         public async Task<DtoCourseView> GetByNameAsync(string name)
@@ -51,7 +51,7 @@ namespace OnlineSchool.Courses.Services
             return course;
         }
 
-        public async Task<DtoCourseView> GetById(int id)
+        public async Task<DtoCourseView> GetById(string id)
         {
             var course = await _repository.GetByIdAsync(id);
 

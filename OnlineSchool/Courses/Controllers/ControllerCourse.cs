@@ -48,7 +48,7 @@ namespace OnlineSchool.Courses.Controllers
 
         }
 
-        public override async Task<ActionResult<DtoCourseView>> GetById([FromQuery] int id)
+        public override async Task<ActionResult<DtoCourseView>> GetById([FromQuery] string id)
         {
 
             try
@@ -76,7 +76,7 @@ namespace OnlineSchool.Courses.Controllers
             }
         }
 
-        public override async Task<ActionResult<Course>> UpdateCourse([FromQuery] int id, UpdateRequestCourse request)
+        public override async Task<ActionResult<Course>> UpdateCourse([FromQuery] string id, UpdateRequestCourse request)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace OnlineSchool.Courses.Controllers
             }
         }
 
-        public override async Task<ActionResult<Course>> DeleteCourse([FromQuery] int id)
+        public override async Task<ActionResult<Course>> DeleteCourse([FromQuery] string id)
         {
             try
             {

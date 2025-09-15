@@ -21,18 +21,12 @@ namespace OnlineSchool.Enrolments.Repository
 
         public async Task<List<Enrolment>> GetAllAsync()
         {
-            return await _context.Enrolments.ToListAsync();
+            return await _context.Enrolments.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Enrolment> GetByIdAsync(int id)
+        public async Task<Enrolment> GetByIdAsync(string id)
         {
-            List<Enrolment> enrolments = await _context.Enrolments.ToListAsync();
-
-            for (int i = 0; i < enrolments.Count; i++)
-            {
-                if (enrolments[i].Id == id) return enrolments[i];
-            }
-            return null;
+            return await _context.Enrolments.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
         }
 
     }

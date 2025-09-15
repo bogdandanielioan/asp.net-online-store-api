@@ -35,7 +35,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> Update(int id, UpdateRequestStudent request)
+        public async Task<Student> Update(string id, UpdateRequestStudent request)
         {
 
             var student = await _repository.GetById(id);
@@ -53,7 +53,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> Delete(int id)
+        public async Task<Student> Delete(string id)
         {
 
             var student = await _repository.GetById(id);
@@ -65,7 +65,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> CreateBookForStudent(int idStudent,BookCreateDTO createRequestBook)
+        public async Task<Student> CreateBookForStudent(string idStudent,BookCreateDTO createRequestBook)
         {
             var student = await _repository.GetById(idStudent);
             if (student == null)
@@ -73,7 +73,7 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-            if (createRequestBook.Name.Equals(""))
+            if (string.IsNullOrWhiteSpace(createRequestBook.Name))
             {
                 throw new InvalidName(Constants.InvalidName);
             }
@@ -83,7 +83,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> UpdateBookForStudent(int idStudent, int idBook, BookUpdateDTO bookUpdateDTO)
+        public async Task<Student> UpdateBookForStudent(string idStudent, string idBook, BookUpdateDTO bookUpdateDTO)
         {
             var student = await _repository.GetById(idStudent);
             if (student == null)
@@ -107,7 +107,7 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-            if (book.Name == null)
+            if (string.IsNullOrWhiteSpace(book.Name))
             {
                 throw new InvalidName(Constants.InvalidName);
             }
@@ -116,7 +116,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> DeleteBookForStudent(int idStudent, int idBook)
+        public async Task<Student> DeleteBookForStudent(string idStudent, string idBook)
         {
             var student = await _repository.GetById(idStudent);
             if (student == null)
@@ -144,7 +144,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> EnrollmentCourse(int idStudent, Course course)
+        public async Task<Student> EnrollmentCourse(string idStudent, Course course)
         {
             var student = await _repository.GetById(idStudent);
             if (student == null)
@@ -163,7 +163,7 @@ namespace OnlineSchool.Students.Services
             return student;
         }
 
-        public async Task<Student> UnEnrollmentCourse(int idStudent, Course course)
+        public async Task<Student> UnEnrollmentCourse(string idStudent, Course course)
         {
             var student = await _repository.GetById(idStudent);
             if (student == null)

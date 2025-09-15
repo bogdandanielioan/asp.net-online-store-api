@@ -10,7 +10,7 @@ namespace OnlineSchool.Courses.Services.interfaces
 
         Task<List<DtoCourseView>> GetAll();
 
-        Task<DtoCourseView> GetById(int id);
+        Task<DtoCourseView> GetById(string id);
 
         Task<DtoCourseView> GetByNameAsync(string name);
         Task<Course> GetByName(string name);

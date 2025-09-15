@@ -20,31 +20,17 @@ namespace OnlineSchool.StudentsCard.Repository
 
         public async Task<List<StudentCard>> GetAllAsync()
         {
-            return await _context.Studentscard.ToListAsync();
+            return await _context.Studentscard.AsNoTracking().ToListAsync();
         }
 
-        public async Task<StudentCard> GetByIdAsync(int id)
+        public async Task<StudentCard> GetByIdAsync(string id)
         {
-            var studentCards = await _context.Studentscard.ToListAsync();
-
-            for (int i = 0; i < studentCards.Count; i++)
-            {
-                if (studentCards[i].Id == id) return studentCards[i];
-            }
-
-            return null;
+            return await _context.Studentscard.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<StudentCard> GetByNameAsync(string name)
         {
-            var studentCards = await _context.Studentscard.ToListAsync();
-
-            for (int i = 0; i < studentCards.Count; i++)
-            {
-                if (studentCards[i].Namecard == name) return studentCards[i];
-            }
-
-            return null;
+            return await _context.Studentscard.AsNoTracking().FirstOrDefaultAsync(c => c.Namecard == name);
         }
 
 

@@ -33,7 +33,7 @@ namespace OnlineSchool.Enrolments.Controllers
             }
         }
 
-        public override async Task<ActionResult<Enrolment>> GetById([FromQuery] int id)
+        public override async Task<ActionResult<Enrolment>> GetById([FromQuery] string id)
         {
 
             try

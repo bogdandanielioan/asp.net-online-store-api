@@ -60,7 +60,7 @@ namespace OnlineSchool.Students.Controllers
 
         }
 
-        public override async Task<ActionResult<DtoStudentView>> GetById([FromQuery] int id)
+        public override async Task<ActionResult<DtoStudentView>> GetById([FromQuery] string id)
         {
 
             try
@@ -75,7 +75,7 @@ namespace OnlineSchool.Students.Controllers
 
         }
 
-        public override async Task<ActionResult<StudentCard>> GetStudentCard([FromQuery] int id)
+        public override async Task<ActionResult<StudentCard>> GetStudentCard([FromQuery] string id)
         {
 
             try
@@ -103,7 +103,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> UpdateStudent([FromQuery] int id, UpdateRequestStudent request)
+        public override async Task<ActionResult<Student>> UpdateStudent([FromQuery] string id, UpdateRequestStudent request)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> DeleteStudent([FromQuery] int id)
+        public override async Task<ActionResult<Student>> DeleteStudent([FromQuery] string id)
         {
             try
             {
@@ -133,7 +133,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> CreateBookForStudent([FromQuery] int idStudent, BookCreateDTO request)
+        public override async Task<ActionResult<Student>> CreateBookForStudent([FromQuery] string idStudent, BookCreateDTO request)
         {
             try
             {
@@ -151,7 +151,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> UpdateBookForStudent([FromQuery] int idStudent, [FromQuery] int idBook, BookUpdateDTO request)
+        public override async Task<ActionResult<Student>> UpdateBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook, BookUpdateDTO request)
         {
             try
             {
@@ -170,7 +170,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> DeleteBookForStudent([FromQuery] int idStudent, [FromQuery] int idBook)
+        public override async Task<ActionResult<Student>> DeleteBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook)
         {
             try
             {
@@ -185,7 +185,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> EnrollmentCourse([FromQuery] int idStudent, [FromQuery] string name)
+        public override async Task<ActionResult<Student>> EnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
         {
 
             try
@@ -213,12 +213,12 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> UnEnrollmentCourse([FromQuery] int idStudent, [FromQuery] string nameCourse)
+        public override async Task<ActionResult<Student>> UnEnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
         {
             try
             {
 
-                Course course = await _queryServiceCourse.GetByName(nameCourse);
+                Course course = await _queryServiceCourse.GetByName(name);
 
                 var student = await _commandService.UnEnrollmentCourse(idStudent, course);
 

@@ -15,27 +15,27 @@ namespace OnlineSchool.Students.Repository.interfaces
 
         Task<DtoStudentView> GetByNameAsync(string destination);
 
-        Task<Student> GetById(int id);
+        Task<Student> GetById(string id);
 
-        Task<DtoStudentView> GetByIdAsync(int id);
+        Task<DtoStudentView> GetByIdAsync(string id);
 
-        Task<StudentCard> CardByIdAsync(int id);
+        Task<StudentCard> CardByIdAsync(string id);
 
         Task<Student> Create(CreateRequestStudent request);
 
-        Task<Student> Update(int id, UpdateRequestStudent request);
+        Task<Student> Update(string id, UpdateRequestStudent request);
 
-        Task<Student> DeleteById(int id);
+        Task<Student> DeleteById(string id);
 
-        Task<Student> CreateBookForStudent(int idStudent, BookCreateDTO createRequestBook);
+        Task<Student> CreateBookForStudent(string idStudent, BookCreateDTO createRequestBook);
 
-        Task<Student> UpdateBookForStudent(int idStudent, int idBook, BookUpdateDTO bookUpdateDTO);
+        Task<Student> UpdateBookForStudent(string idStudent, string idBook, BookUpdateDTO bookUpdateDTO);
 
-        Task<Student> DeleteBookForStudent(int idStudent, int idBook);
+        Task<Student> DeleteBookForStudent(string idStudent, string idBook);
 
-        Task<Student> EnrollmentCourse(int idStudent, Course course);
+        Task<Student> EnrollmentCourse(string idStudent, Course course);
 
-        Task<Student> UnEnrollmentCourse(int idStudent, Course course);
+        Task<Student> UnEnrollmentCourse(string idStudent, Course course);
 
     }
 }

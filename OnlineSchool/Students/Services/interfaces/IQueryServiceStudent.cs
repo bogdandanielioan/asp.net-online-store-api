@@ -10,10 +10,10 @@ namespace OnlineSchool.Students.Services.interfaces
 
         Task<List<DtoStudentView>> GetAll();
 
-        Task<DtoStudentView> GetById(int id);
+        Task<DtoStudentView> GetById(string id);
 
         Task<DtoStudentView> GetByNameAsync(string name);
 
-        Task<StudentCard> CardById(int id);
+        Task<StudentCard> CardById(string id);
     }
 }

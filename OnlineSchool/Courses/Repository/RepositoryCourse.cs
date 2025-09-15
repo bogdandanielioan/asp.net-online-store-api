@@ -6,6 +6,7 @@ using OnlineSchool.Courses.Repository.interfaces;
 using OnlineSchool.Data;
 using OnlineSchool.Students.Dto;
 using OnlineSchool.Students.Models;
+using OnlineSchool.System.Id;
 using System.ComponentModel;
 
 namespace OnlineSchool.Courses.Repository
@@ -25,34 +26,37 @@ namespace OnlineSchool.Courses.Repository
 
         public async Task<List<DtoCourseView>> GetAllAsync()
         {
-            List<Course> courses = await _context.Courses.Include(s => s.EnrolledStudents).ToListAsync();
+            var courses = await _context.Courses
+                .AsNoTracking()
+                .Include(c => c.EnrolledStudents)
+                .ToListAsync();
 
-            List<DtoCourseView> courseView = new List<DtoCourseView>();
+            // Preload all referenced students to avoid N+1 queries
+            var allStudentIds = courses
+                .SelectMany(c => c.EnrolledStudents.Select(es => es.IdStudent))
+                .Distinct()
+                .ToList();
+
+            var studentsById = await _context.Students
+                .AsNoTracking()
+                .Where(s => allStudentIds.Contains(s.Id))
+                .ToDictionaryAsync(s => s.Id);
+
+            var courseView = new List<DtoCourseView>(courses.Count);
 
             foreach (var course in courses)
             {
-                DtoCourseView dtoCourseView = new DtoCourseView();
-
-                dtoCourseView.Id = course.Id;
-                dtoCourseView.Name = course.Name;
-                dtoCourseView.Department = course.Department;
-
-                List<DtoStudentViewForCourse> studentView = new List<DtoStudentViewForCourse>();
-
-                List<int> idStudents = course.EnrolledStudents.Select(s => s.IdStudent).ToList();
-
-                foreach(var idStudent in idStudents)
+                var dtoCourseView = new DtoCourseView
                 {
-                    DtoStudentViewForCourse student = new DtoStudentViewForCourse();
-                    Student studentById = _context.Students.Find(idStudent);
-                    student.Name = studentById.Name;
-                    student.Email = studentById.Email;
-                    student.Age = studentById.Age;
-
-                    studentView.Add(student);
-                }
-
-                dtoCourseView.EnrolledStudents = studentView;
+                    Id = course.Id,
+                    Name = course.Name,
+                    Department = course.Department,
+                    EnrolledStudents = course.EnrolledStudents
+                        .Select(es => studentsById.TryGetValue(es.IdStudent, out var s)
+                            ? new DtoStudentViewForCourse { Name = s.Name, Email = s.Email, Age = s.Age }
+                            : new DtoStudentViewForCourse())
+                        .ToList()
+                };
 
                 courseView.Add(dtoCourseView);
             }
@@ -60,51 +64,41 @@ namespace OnlineSchool.Courses.Repository
             return courseView;
         }
 
-        public async Task<Course> GetById(int id)
+        public async Task<Course> GetById(string id)
         {
-            List<Course> courses = await _context.Courses.Include(s => s.EnrolledStudents).ToListAsync();
-
-            for (int i = 0; i < courses.Count; i++)
-            {
-                if (courses[i].Id == id) return courses[i];
-            }
-            return null;
+            return await _context.Courses
+                .AsNoTracking()
+                .Include(c => c.EnrolledStudents)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<DtoCourseView> GetByIdAsync(int id)
+        public async Task<DtoCourseView> GetByIdAsync(string id)
         {
-            List<Course> courses = await _context.Courses.Include(s => s.EnrolledStudents).ToListAsync();
+            var course = await _context.Courses
+                .AsNoTracking()
+                .Include(c => c.EnrolledStudents)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            var course = (Course)null;
-            for (int i = 0; i < courses.Count; i++)
+            if (course == null)
+                return null;
+
+            var idStudents = course.EnrolledStudents.Select(es => es.IdStudent).Distinct().ToList();
+            var studentsById = await _context.Students
+                .AsNoTracking()
+                .Where(s => idStudents.Contains(s.Id))
+                .ToDictionaryAsync(s => s.Id);
+
+            var dtoCourseView = new DtoCourseView
             {
-                if (courses[i].Id == id) course = courses[i];
-            }
-
-            if(course == null)
-            return null;
-
-            DtoCourseView dtoCourseView = new DtoCourseView();
-
-            dtoCourseView.Name = course.Name;
-            dtoCourseView.Department = course.Department;
-
-            List<DtoStudentViewForCourse> studentView = new List<DtoStudentViewForCourse>();
-
-            List<int> idStudents = course.EnrolledStudents.Select(s => s.IdStudent).ToList();
-
-            foreach (var idStudent in idStudents)
-            {
-                DtoStudentViewForCourse student = new DtoStudentViewForCourse();
-                Student studentById = _context.Students.Find(idStudent);
-                student.Name = studentById.Name;
-                student.Email = studentById.Email;
-                student.Age = studentById.Age;
-
-                studentView.Add(student);
-            }
-
-            dtoCourseView.EnrolledStudents = studentView;
+                Id = course.Id,
+                Name = course.Name,
+                Department = course.Department,
+                EnrolledStudents = course.EnrolledStudents
+                    .Select(es => studentsById.TryGetValue(es.IdStudent, out var s)
+                        ? new DtoStudentViewForCourse { Name = s.Name, Email = s.Email, Age = s.Age }
+                        : new DtoStudentViewForCourse())
+                    .ToList()
+            };
 
             return dtoCourseView;
         }
@@ -132,7 +126,7 @@ namespace OnlineSchool.Courses.Repository
 
             List<DtoStudentViewForCourse> studentView = new List<DtoStudentViewForCourse>();
 
-            List<int> idStudents = course.EnrolledStudents.Select(s => s.IdStudent).ToList();
+            List<string> idStudents = course.EnrolledStudents.Select(s => s.IdStudent).ToList();
 
             foreach (var idStudent in idStudents)
             {
@@ -170,6 +164,7 @@ namespace OnlineSchool.Courses.Repository
         {
 
             var course = _mapper.Map<Course>(request);
+            course.Id = IdGenerator.New("course");
 
             _context.Courses.Add(course);
 
@@ -177,7 +172,7 @@ namespace OnlineSchool.Courses.Repository
             return course;
         }
 
-        public async Task<Course> Update(int id, UpdateRequestCourse request)
+        public async Task<Course> Update(string id, UpdateRequestCourse request)
         {
 
             var course = await _context.Courses.FindAsync(id);
@@ -192,7 +187,7 @@ namespace OnlineSchool.Courses.Repository
             return course;
         }
 
-        public async Task<Course> DeleteById(int id)
+        public async Task<Course> DeleteById(string id)
         {
             var course = await _context.Courses.FindAsync(id);
 
