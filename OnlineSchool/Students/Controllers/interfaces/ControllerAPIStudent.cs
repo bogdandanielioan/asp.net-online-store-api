@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OnlineSchool.Books.Models;
 using OnlineSchool.Enrolments.Dto;
 using OnlineSchool.StudentCards.Models;
@@ -9,72 +10,85 @@ using System;
 namespace OnlineSchool.Students.Controllers.interfaces
 {
     [ApiController]
-    [Route("api/v1/[controller]/")]
+    [Route("api/v1/students/")]
+    [Route("api/v1/ControllerStudent/")]
     public abstract class ControllerAPIStudent : ControllerBase
     {
 
         [HttpGet("all")]
+        [Authorize(Policy = "read:student")]
         [ProducesResponseType(statusCode: 200, type: typeof(List<Student>))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         public abstract Task<ActionResult<List<DtoStudentView>>> GetStudents();
 
         [HttpGet("studentCard")]
+        [Authorize(Policy = "read:student")]
         [ProducesResponseType(statusCode: 200, type: typeof(List<Student>))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         public abstract Task<ActionResult<StudentCard>> GetStudentCard([FromQuery]string id);
 
         [HttpGet("findById")]
+        [Authorize(Policy = "read:student")]
         [ProducesResponseType(statusCode: 200, type: typeof(Student))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         public abstract Task<ActionResult<DtoStudentView>> GetById([FromQuery] string id);
 
         [HttpGet("findByName")]
-        [ProducesResponseType(statusCode: 200, type: typeof(Student))]
+        [Authorize(Policy = "read:student")]
+        [ProducesResponseType(statusCode: 200, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> GetByName([FromQuery] string name);
+        public abstract Task<ActionResult<DtoStudentView>> GetByName([FromQuery] string name);
 
         [HttpPost("createStudent")]
-        [ProducesResponseType(statusCode: 201, type: typeof(Student))]
+        [AllowAnonymous]
+        [ProducesResponseType(statusCode: 201, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> CreateStudent(CreateRequestStudent request);
+        public abstract Task<ActionResult<DtoStudentView>> CreateStudent(CreateRequestStudent request);
 
         [HttpPut("updateStudent")]
-        [ProducesResponseType(statusCode: 200, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 200, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> UpdateStudent([FromQuery] string id, UpdateRequestStudent request);
+        public abstract Task<ActionResult<DtoStudentView>> UpdateStudent([FromQuery] string id, UpdateRequestStudent request);
 
         [HttpDelete("deleteStudent")]
-        [ProducesResponseType(statusCode: 200, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 200, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> DeleteStudent([FromQuery] string id);
+        public abstract Task<ActionResult<DtoStudentView>> DeleteStudent([FromQuery] string id);
 
 
         [HttpPost("createBookForStudent")]
-        [ProducesResponseType(statusCode: 201, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 201, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> CreateBookForStudent([FromQuery]string idStudent,BookCreateDTO request);
+        public abstract Task<ActionResult<DtoStudentView>> CreateBookForStudent([FromQuery]string idStudent,BookCreateDTO request);
 
         [HttpPut("updateBookForStudent")]
-        [ProducesResponseType(statusCode: 200, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 200, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> UpdateBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook, BookUpdateDTO request);
+        public abstract Task<ActionResult<DtoStudentView>> UpdateBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook, BookUpdateDTO request);
 
         [HttpDelete("deleteBookForStudent")]
-        [ProducesResponseType(statusCode: 200, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 200, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> DeleteBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook);
+        public abstract Task<ActionResult<DtoStudentView>> DeleteBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook);
 
         [HttpPost("enrollmentCourse")]
-        [ProducesResponseType(statusCode: 201, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 201, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 400, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> EnrollmentCourse([FromQuery] string idStudent,[FromQuery]string name);
+        public abstract Task<ActionResult<DtoStudentView>> EnrollmentCourse([FromQuery] string idStudent,[FromQuery]string name);
 
         [HttpDelete("unenrollmentCourse")]
-        [ProducesResponseType(statusCode: 200, type: typeof(Student))]
+        [Authorize(Policy = "write:student")]
+        [ProducesResponseType(statusCode: 200, type: typeof(DtoStudentView))]
         [ProducesResponseType(statusCode: 404, type: typeof(string))]
-        public abstract Task<ActionResult<Student>> UnEnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name);
+        public abstract Task<ActionResult<DtoStudentView>> UnEnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name);
 
 
     }

@@ -30,6 +30,22 @@ namespace OnlineSchool.Students.Controllers
             _queryServiceCourse = queryServiceCourse;
         }
 
+        private static DtoStudentView ToDto(Student s)
+        {
+            return new DtoStudentView
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Email = s.Email,
+                Age = s.Age,
+                UpdateData = s.UpdateDate,
+                StudentBooks = s.StudentBooks ?? new List<Book>(),
+                MyCardNumber = s.CardNumber,
+                MyCourses = new List<OnlineSchool.Courses.Dto.DtoCourseViewForStudents>(),
+                Role = s.Role
+            };
+        }
+
         public override async Task<ActionResult<List<DtoStudentView>>> GetStudents()
         {
             try
@@ -45,7 +61,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> GetByName([FromQuery] string name)
+        public override async Task<ActionResult<DtoStudentView>> GetByName([FromQuery] string name)
         {
 
             try
@@ -90,12 +106,12 @@ namespace OnlineSchool.Students.Controllers
 
         }
 
-        public override async Task<ActionResult<Student>> CreateStudent(CreateRequestStudent request)
+        public override async Task<ActionResult<DtoStudentView>> CreateStudent(CreateRequestStudent request)
         {
             try
             {
                 var student = await _commandService.Create(request);
-                return Ok(student);
+                return Ok(ToDto(student));
             }
             catch (InvalidAge ex)
             {
@@ -103,12 +119,12 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> UpdateStudent([FromQuery] string id, UpdateRequestStudent request)
+        public override async Task<ActionResult<DtoStudentView>> UpdateStudent([FromQuery] string id, UpdateRequestStudent request)
         {
             try
             {
                 var student = await _commandService.Update(id, request);
-                return Ok(student);
+                return Ok(ToDto(student));
             }
             catch (InvalidAge ex)
             {
@@ -120,12 +136,12 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> DeleteStudent([FromQuery] string id)
+        public override async Task<ActionResult<DtoStudentView>> DeleteStudent([FromQuery] string id)
         {
             try
             {
                 var student = await _commandService.Delete(id);
-                return Ok(student);
+                return Ok(ToDto(student));
             }
             catch (ItemDoesNotExist ex)
             {
@@ -133,13 +149,13 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> CreateBookForStudent([FromQuery] string idStudent, BookCreateDTO request)
+        public override async Task<ActionResult<DtoStudentView>> CreateBookForStudent([FromQuery] string idStudent, BookCreateDTO request)
         {
             try
             {
                 var student = await _commandService.CreateBookForStudent(idStudent, request);
 
-                return Ok(student);
+                return Ok(ToDto(student));
 
             }catch(ItemDoesNotExist ex)
             {
@@ -151,13 +167,13 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> UpdateBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook, BookUpdateDTO request)
+        public override async Task<ActionResult<DtoStudentView>> UpdateBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook, BookUpdateDTO request)
         {
             try
             {
                 var student = await _commandService.UpdateBookForStudent(idStudent,idBook, request);
 
-                return Ok(student);
+                return Ok(ToDto(student));
 
             }
             catch (ItemDoesNotExist ex)
@@ -170,13 +186,13 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> DeleteBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook)
+        public override async Task<ActionResult<DtoStudentView>> DeleteBookForStudent([FromQuery] string idStudent, [FromQuery] string idBook)
         {
             try
             {
                 var student = await _commandService.DeleteBookForStudent(idStudent, idBook);
 
-                return Ok(student);
+                return Ok(ToDto(student));
 
             }
             catch (ItemDoesNotExist ex)
@@ -185,7 +201,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> EnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
+        public override async Task<ActionResult<DtoStudentView>> EnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
         {
             try
             {
@@ -196,7 +212,7 @@ namespace OnlineSchool.Students.Controllers
                 }
 
                 var student = await _commandService.EnrollmentCourse(idStudent, course);
-                return Ok(student);
+                return Ok(ToDto(student));
             }
             catch (NotFoundCourse ex)
             {
@@ -212,7 +228,7 @@ namespace OnlineSchool.Students.Controllers
             }
         }
 
-        public override async Task<ActionResult<Student>> UnEnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
+        public override async Task<ActionResult<DtoStudentView>> UnEnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
         {
             try
             {
@@ -225,7 +241,7 @@ namespace OnlineSchool.Students.Controllers
 
                 var student = await _commandService.UnEnrollmentCourse(idStudent, course);
 
-                return Ok(student);
+                return Ok(ToDto(student));
 
             }
             catch(NotFoundCourse ex)

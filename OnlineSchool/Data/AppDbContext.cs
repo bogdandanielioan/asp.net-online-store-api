@@ -5,6 +5,7 @@ using OnlineSchool.Courses.Models;
 using OnlineSchool.Enrolments.Models;
 using OnlineSchool.StudentCards.Models;
 using OnlineSchool.Students.Models;
+using OnlineSchool.Teachers.Models;
 
 
 namespace OnlineSchool.Data
@@ -22,14 +23,15 @@ namespace OnlineSchool.Data
         public virtual DbSet<StudentCard> Studentscard { get; set; }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Book> Books { get; set; }
+        public virtual DbSet<Teacher> Teachers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Map entities to existing table names created via FluentMigrator
             modelBuilder.Entity<Student>().ToTable("students");
             modelBuilder.Entity<Book>().ToTable("books");
             modelBuilder.Entity<StudentCard>().ToTable("studentscard");
             modelBuilder.Entity<Course>().ToTable("courses");
             modelBuilder.Entity<Enrolment>().ToTable("enrolments");
+            modelBuilder.Entity<Teacher>().ToTable("teachers");
 
             modelBuilder.Entity<Book>()
                 .HasOne(a => a.Student)
@@ -56,6 +58,13 @@ namespace OnlineSchool.Data
                 .WithMany(s => s.EnrolledStudents)
                 .HasForeignKey(a => a.IdCourse)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Teacher 1 - many Courses
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Teacher)
+                .WithMany(t => t.Courses)
+                .HasForeignKey(c => c.TeacherId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
     }

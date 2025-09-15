@@ -1,5 +1,9 @@
 using FluentMigrator.Runner;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using OnlineSchool.Books.Repository;
 using OnlineSchool.Books.Repository.interfaces;
 using OnlineSchool.Books.Services;
@@ -22,17 +26,99 @@ using OnlineSchool.Students.Repository.interfaces;
 using OnlineSchool.Students.Services;
 using OnlineSchool.Students.Services.interfaces;
 using OnlineSchool.StudentsCard.Repository;
+using OnlineSchool.Teachers.Repository;
+using OnlineSchool.Teachers.Repository.interfaces;
+using OnlineSchool.Teachers.Services;
+using OnlineSchool.Teachers.Services.interfaces;
 using MySqlConnector;
+using OnlineSchool.Auth;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "OnlineSchool API",
+        Version = "v1",
+        Description = "API documentation for OnlineSchool. Use the Authorize button to enter a Bearer token."
+    });
 
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Enter 'Bearer {your JWT token}'. Example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+});
+
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSection["Key"] ?? "");
+
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+        options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+    })
+    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+}
+else
+{
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidAudience = jwtSection["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+}
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Read", policy => policy.RequireClaim("permission", "read"));
+    options.AddPolicy("Write", policy => policy.RequireClaim("permission", "write"));
+    options.AddPolicy("read:student", policy => policy.RequireAssertion(ctx =>
+        ctx.User.HasClaim("permission", "read:student") || ctx.User.HasClaim("permission", "read")));
+    options.AddPolicy("write:student", policy => policy.RequireAssertion(ctx =>
+        ctx.User.HasClaim("permission", "write:student") || ctx.User.HasClaim("permission", "write")));
+
+    options.AddPolicy("read:course", policy => policy.RequireAssertion(ctx =>
+        ctx.User.HasClaim("permission", "read:course") || ctx.User.HasClaim("permission", "read")));
+    options.AddPolicy("write:course", policy => policy.RequireAssertion(ctx =>
+        ctx.User.HasClaim("permission", "write:course") || ctx.User.HasClaim("permission", "write")));
+});
 
 builder.Services.AddScoped<IRepositoryStudentCard, RepositoryStudentCard>();
 builder.Services.AddScoped<IQueryServiceStudentCard, QueryServiceStudentCards>();
@@ -47,6 +133,10 @@ builder.Services.AddScoped<IQueryServiceBook, QueryServiceBook>();
 builder.Services.AddScoped<IRepositoryCourse, RepositoryCourse>();
 builder.Services.AddScoped<IQueryServiceCourse, QueryServiceCourse>();
 builder.Services.AddScoped<ICommandServiceCourse, CommandServiceCourse>();
+
+builder.Services.AddScoped<IRepositoryTeacher, RepositoryTeacher>();
+builder.Services.AddScoped<IQueryServiceTeacher, QueryServiceTeachers>();
+builder.Services.AddScoped<ICommandServiceTeacher, CommandServiceTeachers>();
 
 builder.Services.AddScoped<IRepositoryEnrolment, RepositoryEnrolment>();
 builder.Services.AddScoped<IQueryServiceEnrolment, QueryServiceEnrolment>();
@@ -63,7 +153,6 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -72,6 +161,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -102,11 +192,9 @@ static void EnsureDatabaseExists(string? connectionString)
     var database = builder.Database;
     if (string.IsNullOrWhiteSpace(database))
     {
-        // Nothing to ensure if DB name is not present
         return;
     }
 
-    // Build a server-level connection string (no database)
     builder.Database = string.Empty;
 
     using var connection = new MySqlConnection(builder.ConnectionString);

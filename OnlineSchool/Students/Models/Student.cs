@@ -24,6 +24,13 @@ namespace OnlineSchool.Students.Models{
         [Required]
         public DateTime UpdateDate { get; set; }
 
+        // Role-based authorization: every student is a User by default
+        public string? Role { get; set; }
+
+        // Password storage (hashed). Null for legacy/seeds without password
+        public string? PasswordHash { get; set; }
+        public string? PasswordSalt { get; set; }
+
      /*   public string description()
         {
             string t = "";

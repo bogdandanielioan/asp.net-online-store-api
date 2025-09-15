@@ -62,7 +62,8 @@ namespace OnlineSchool.Students.Repository
                         .Select(mc => coursesById.TryGetValue(mc.IdCourse, out var c)
                             ? new DtoCourseViewForStudents { Name = c.Name, Department = c.Department }
                             : new DtoCourseViewForStudents())
-                        .ToList()
+                        .ToList(),
+                    Role = student.Role
                 };
 
                 studentViews.Add(dtoStudentView);
@@ -107,7 +108,8 @@ namespace OnlineSchool.Students.Repository
                     .Select(mc => coursesById.TryGetValue(mc.IdCourse, out var c)
                         ? new DtoCourseViewForStudents { Name = c.Name, Department = c.Department }
                         : new DtoCourseViewForStudents())
-                    .ToList()
+                    .ToList(),
+                Role = student.Role
             };
 
             return dtoStudentView;
@@ -151,7 +153,8 @@ namespace OnlineSchool.Students.Repository
                     .Select(mc => coursesById.TryGetValue(mc.IdCourse, out var c)
                         ? new DtoCourseViewForStudents { Name = c.Name, Department = c.Department }
                         : new DtoCourseViewForStudents())
-                    .ToList()
+                    .ToList(),
+                Role = student.Role
             };
 
             return dtoStudentView;
@@ -163,6 +166,16 @@ namespace OnlineSchool.Students.Repository
 
             var student = _mapper.Map<Student>(request);
             student.Id = IdGenerator.New("student");
+            // Assign default role to all students
+            student.Role = string.IsNullOrWhiteSpace(student.Role) ? "User" : student.Role;
+
+            // Hash and store password if provided
+            if (!string.IsNullOrWhiteSpace(request.Password))
+            {
+                var hp = OnlineSchool.Auth.Services.PasswordHasher.HashPassword(request.Password);
+                student.PasswordHash = hp.Hash;
+                student.PasswordSalt = hp.Salt;
+            }
 
             var card = _mapper.Map<StudentCard>(request);
             card.Id = IdGenerator.New("studentcard");

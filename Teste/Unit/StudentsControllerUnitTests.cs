@@ -134,7 +134,7 @@ public class StudentsControllerUnitTests
         var result = await ctrl.CreateStudent(create);
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
-        var value = Assert.IsType<Student>(ok.Value);
+        var value = Assert.IsType<DtoStudentView>(ok.Value);
         Assert.Equal("s4", value.Id);
     }
 
@@ -161,7 +161,7 @@ public class StudentsControllerUnitTests
         var result = await ctrl.UpdateStudent("s5", update);
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
-        var value = Assert.IsType<Student>(ok.Value);
+        var value = Assert.IsType<DtoStudentView>(ok.Value);
         Assert.Equal("s5", value.Id);
     }
 

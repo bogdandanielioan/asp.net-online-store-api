@@ -74,6 +74,10 @@ namespace OnlineSchool.Courses.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (ItemDoesNotExist ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         public override async Task<ActionResult<Course>> UpdateCourse([FromQuery] string id, UpdateRequestCourse request)

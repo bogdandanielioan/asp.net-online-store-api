@@ -27,5 +27,6 @@ namespace OnlineSchool.Students.Dto
 
         public List<DtoCourseViewForStudents> MyCourses { get; set; } = new List<DtoCourseViewForStudents>();
 
+        public string? Role { get; set; }
     }
 }

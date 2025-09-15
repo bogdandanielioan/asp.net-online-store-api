@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using OnlineSchool.Enrolments.Models;
-using OnlineSchool.Students.Models;
+using OnlineSchool.Teachers.Models;
 
 namespace OnlineSchool.Courses.Models
 {
@@ -16,6 +16,10 @@ namespace OnlineSchool.Courses.Models
 
         [Required]
         public string Department { get; set; }
+
+        // Relation: many courses to one teacher
+        public string? TeacherId { get; set; }
+        public virtual Teacher? Teacher { get; set; }
 
         public virtual List<Enrolment> EnrolledStudents { get; set; }
     }

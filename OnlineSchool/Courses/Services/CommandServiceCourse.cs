@@ -4,27 +4,43 @@ using OnlineSchool.System.Constants;
 using OnlineSchool.System.Exceptions;
 using OnlineSchool.Courses.Models;
 using OnlineSchool.Courses.Dto;
+using OnlineSchool.Teachers.Services.interfaces;
 
 namespace OnlineSchool.Courses.Services
 {
     public class CommandServiceCourse : ICommandServiceCourse
     {
-        private IRepositoryCourse _repository;
+        private readonly IRepositoryCourse _repository;
+        private readonly IQueryServiceTeacher _teacherQueryService;
 
-        public CommandServiceCourse(IRepositoryCourse repository)
+        public CommandServiceCourse(IRepositoryCourse repository, IQueryServiceTeacher teacherQueryService)
         {
             _repository = repository;
+            _teacherQueryService = teacherQueryService;
         }
 
         public async Task<Course> Create(CreateRequestCourse request)
         {
-
-            if (request.Name.Equals(""))
+            if (string.IsNullOrWhiteSpace(request.Name))
             {
                 throw new InvalidName(Constants.InvalidName);
             }
-            var course = await _repository.Create(request);
+            if (string.IsNullOrWhiteSpace(request.TeacherId))
+            {
+                throw new InvalidName(Constants.InvalidName);
+            }
 
+            // Ensure the teacher exists
+            try
+            {
+                await _teacherQueryService.GetByIdAsync(request.TeacherId);
+            }
+            catch (ItemDoesNotExist)
+            {
+                throw; // propagate 404 handling to controller layer
+            }
+
+            var course = await _repository.Create(request);
             return course;
         }
 
@@ -48,7 +64,6 @@ namespace OnlineSchool.Courses.Services
 
         public async Task<Course> Delete(string id)
         {
-
             var course = await _repository.GetById(id);
             if (course == null)
             {

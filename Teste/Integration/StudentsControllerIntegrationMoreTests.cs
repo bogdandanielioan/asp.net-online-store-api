@@ -96,7 +96,7 @@ public class StudentsControllerIntegrationMoreTests : IClassFixture<CustomWebApp
     public async Task Enrollment_And_Unenrollment_NewCourse_Succeeds()
     {
         // Create a new course
-        var courseReq = new CreateRequestCourse { Name = "History", Department = "Arts" };
+        var courseReq = new CreateRequestCourse { Name = "History", Department = "Arts", TeacherId = "t1" };
         var cResp = await _client.PostAsJsonAsync("/api/v1/ControllerCourse/createCourse", courseReq);
         Assert.Equal(HttpStatusCode.OK, cResp.StatusCode);
         var course = await cResp.Content.ReadFromJsonAsync<Course>(JsonOpts);

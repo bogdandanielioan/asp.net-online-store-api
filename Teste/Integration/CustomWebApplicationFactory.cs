@@ -48,6 +48,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             Email = "alice@example.com",
             Age = 20,
             UpdateDate = DateTime.UtcNow,
+            Role = "User",
             StudentBooks = new List<OnlineSchool.Books.Models.Book>(),
             MyCourses = new List<OnlineSchool.Enrolments.Models.Enrolment>()
         });
@@ -84,6 +85,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             IdStudent = "stu1",
             IdCourse = "c1",
             Created = DateTime.UtcNow
+        });
+
+        // Seed a teacher required by Courses creation
+        db.Teachers.Add(new OnlineSchool.Teachers.Models.Teacher
+        {
+            Id = "t1",
+            Name = "Prof One",
+            Email = "prof1@example.com",
+            UpdateDate = DateTime.UtcNow,
+            Role = "Admin"
         });
 
         db.SaveChanges();
