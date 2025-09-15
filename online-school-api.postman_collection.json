@@ -1,0 +1,811 @@
+{
+	"info": {
+		"_postman_id": "4deba8b7-0fd2-4130-9874-2e16793bbfb0",
+		"name": "online-school-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33668461"
+	},
+	"item": [
+		{
+			"name": "ControllerBook",
+			"item": [
+				{
+					"name": "GetAllBooks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerBook/all",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerBook",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerBook/findById?id=17",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerBook",
+								"findById"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "17"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindByName",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerBook/findByName?name=test9",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerBook",
+								"findByName"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "test9"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ControllerStudent",
+			"item": [
+				{
+					"name": "CRUDBook",
+					"item": [
+						{
+							"name": "CreateBookForStudent",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"test\",\r\n  \"created_at\": \"2024-05-09T14:10:51.799Z\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/createBookForStudent?idStudent=1\n",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"createBookForStudent"
+									],
+									"query": [
+										{
+											"key": "idStudent",
+											"value": "1\n"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateBookForStudent",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"test12345\",\r\n  \"created_at\": \"2024-05-09T14:11:34.785Z\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/updateBookForStudent?idStudent=1&idBook=2",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"updateBookForStudent"
+									],
+									"query": [
+										{
+											"key": "idStudent",
+											"value": "1"
+										},
+										{
+											"key": "idBook",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "BookForStudent",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/deleteBookForStudent?idStudent=1&idBook=5",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"deleteBookForStudent"
+									],
+									"query": [
+										{
+											"key": "idStudent",
+											"value": "1"
+										},
+										{
+											"key": "idBook",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUDStudent",
+					"item": [
+						{
+							"name": "CreateStudent",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"test\",\r\n  \"email\": \"test\",\r\n  \"age\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/createStudent",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"createStudent"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateStudent",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"string\",\r\n  \"email\": \"string\",\r\n  \"age\": 13\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/updateStudent?id=17",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"updateStudent"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "17"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DeleteStudent",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/deleteStudent?id=77",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"deleteStudent"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "77"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Courses",
+					"item": [
+						{
+							"name": "EnrollmentCourse",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idCourse\": 1,\r\n  \"created\": \"2024-05-09T14:17:06.159Z\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/enrollmentCourse?idStudent=1",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"enrollmentCourse"
+									],
+									"query": [
+										{
+											"key": "idStudent",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UnenrollmentCourse",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:7046/api/v1/ControllerStudent/unenrollmentCourse?idStudent=1&idCourse=1\n",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "7046",
+									"path": [
+										"api",
+										"v1",
+										"ControllerStudent",
+										"unenrollmentCourse"
+									],
+									"query": [
+										{
+											"key": "idStudent",
+											"value": "1"
+										},
+										{
+											"key": "idCourse",
+											"value": "1\n"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AllStudents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudent/all",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudent",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudent/findById?id=18",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudent",
+								"findById"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "18"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindByName",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudent/findByName?name=filipg",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudent",
+								"findByName"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "filipg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CardStudent",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudent/studentCard?id=1\n",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudent",
+								"studentCard"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1\n"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ControllerCourse",
+			"item": [
+				{
+					"name": "AllCourse",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerCourse/all",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerCourse",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerCourse/findById?id=189",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerCourse",
+								"findById"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "189"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindByName",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerCourse/findByName?name=sdf",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerCourse",
+								"findByName"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "sdf"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateCourse",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"\",\r\n  \"department\": \"test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerCourse/createCourse",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerCourse",
+								"createCourse"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateCourse",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"test\",\r\n  \"department\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerCourse/updateCourse?id=1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerCourse",
+								"updateCourse"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteCourse",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerCourse/deleteCourse?id=88",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerCourse",
+								"deleteCourse"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "88"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ControllerStudentCard",
+			"item": [
+				{
+					"name": "AllStudentCard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudentCards/all",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudentCards",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudentCards/findById?id=1\n",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudentCards",
+								"findById"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1\n"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindByName",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerStudentCards/findByName?name=as\n",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerStudentCards",
+								"findByName"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "as\n"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ControllerEnrolment",
+			"item": [
+				{
+					"name": "AllEnrolments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerEnrolment/all",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerEnrolment",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7046/api/v1/ControllerEnrolment/findById?id=16",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7046",
+							"path": [
+								"api",
+								"v1",
+								"ControllerEnrolment",
+								"findById"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "16"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
