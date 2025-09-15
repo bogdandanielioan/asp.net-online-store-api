@@ -187,21 +187,20 @@ namespace OnlineSchool.Students.Controllers
 
         public override async Task<ActionResult<Student>> EnrollmentCourse([FromQuery] string idStudent, [FromQuery] string name)
         {
-
             try
             {
                 Course course = await _queryServiceCourse.GetByName(name);
                 if (course == null)
                 {
-                    throw new NotFoundCourse(Constants.NotFoundcourse);
-                }
-                else
-                {
-                    var student = await _commandService.EnrollmentCourse(idStudent, course);
-
-                    return Ok(student);
+                    return NotFound(Constants.NotFoundcourse);
                 }
 
+                var student = await _commandService.EnrollmentCourse(idStudent, course);
+                return Ok(student);
+            }
+            catch (NotFoundCourse ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (ItemDoesNotExist ex)
             {
@@ -219,6 +218,10 @@ namespace OnlineSchool.Students.Controllers
             {
 
                 Course course = await _queryServiceCourse.GetByName(name);
+                if (course == null)
+                {
+                    return NotFound(Constants.NotFoundcourse);
+                }
 
                 var student = await _commandService.UnEnrollmentCourse(idStudent, course);
 
@@ -232,6 +235,10 @@ namespace OnlineSchool.Students.Controllers
             catch (ItemDoesNotExist ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (InvalidCourse ex)
+            {
+                return BadRequest(ex.Message);
             }
             
         }

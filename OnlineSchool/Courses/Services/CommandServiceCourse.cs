@@ -30,18 +30,18 @@ namespace OnlineSchool.Courses.Services
 
         public async Task<Course> Update(string id, UpdateRequestCourse request)
         {
-
             var course = await _repository.GetById(id);
             if (course == null)
             {
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-
-            if (course.Name.Equals(""))
+            // Validate new name if provided
+            if (request.Name != null && request.Name.Equals(string.Empty))
             {
                 throw new InvalidName(Constants.InvalidName);
             }
+
             course = await _repository.Update(id, request);
             return course;
         }

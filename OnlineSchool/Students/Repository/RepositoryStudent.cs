@@ -230,8 +230,12 @@ namespace OnlineSchool.Students.Repository
         {
             var student = await _context.Students.FindAsync(idStudent);
 
-            var books = student.StudentBooks;
-            var book = (Book)null;
+            // Ensure books are loaded
+            if (student.StudentBooks == null)
+                _context.Entry(student).Collection(s => s.StudentBooks).Load();
+
+            var books = student.StudentBooks ?? new List<Book>();
+            Book? book = null;
             for (int i = 0; i < books.Count; i++)
             {
                 if (books[i].Id == idBook)
@@ -241,13 +245,15 @@ namespace OnlineSchool.Students.Repository
                 }
             }
 
+            if (book == null)
+            {
+                return student; // no change; upper layers may decide behavior
+            }
+
             book.Name = bookUpdateDTO.Name ?? book.Name;
             book.Created = bookUpdateDTO.Created_at ?? book.Created;
 
             _context.Update(book);
-
-            if (student.StudentBooks == null)
-                _context.Entry(student).Collection(s => s.StudentBooks).Load();
 
             await _context.SaveChangesAsync();
 
@@ -258,8 +264,12 @@ namespace OnlineSchool.Students.Repository
         {
             var student = await _context.Students.FindAsync(idStudent);
 
-            var books = student.StudentBooks;
-            var book = (Book)null;
+            // Ensure books are loaded
+            if (student.StudentBooks == null)
+                _context.Entry(student).Collection(s => s.StudentBooks).Load();
+
+            var books = student.StudentBooks ?? new List<Book>();
+            Book? book = null;
             for (int i = 0; i < books.Count; i++)
             {
                 if (books[i].Id == idBook)
@@ -269,13 +279,10 @@ namespace OnlineSchool.Students.Repository
                 }
             }
 
-            _context.Books.Remove(book);
-            
-
-            if (student.StudentBooks == null)
-                _context.Entry(student).Collection(s => s.StudentBooks).Load();
-
-          //  student.StudentBooks.Remove(book);
+            if (book != null)
+            {
+                _context.Books.Remove(book);
+            }
 
             await _context.SaveChangesAsync();
 

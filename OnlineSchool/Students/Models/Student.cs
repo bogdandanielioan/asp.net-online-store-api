@@ -4,8 +4,8 @@ using OnlineSchool.Books.Models;
 using OnlineSchool.Enrolments.Models;
 using OnlineSchool.StudentCards.Models;
 
-namespace OnlineSchool.Students.Models
-{
+namespace OnlineSchool.Students.Models{
+
     public class Student
     {
         [Key]

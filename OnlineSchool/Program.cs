@@ -76,14 +76,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-    var connStr = config.GetConnectionString("Default");
-    EnsureDatabaseExists(connStr);
+    using (var scope = app.Services.CreateScope())
+    {
+        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        var connStr = config.GetConnectionString("Default");
+        EnsureDatabaseExists(connStr);
 
-    var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-    runner.MigrateUp();
+        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateUp();
+    }
 }
 
 app.Run();
@@ -112,3 +115,5 @@ static void EnsureDatabaseExists(string? connectionString)
     using var cmd = new MySqlCommand($"CREATE DATABASE IF NOT EXISTS `{database}`;", connection);
     cmd.ExecuteNonQuery();
 }
+
+public partial class Program { }

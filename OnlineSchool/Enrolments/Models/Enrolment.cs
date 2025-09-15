@@ -6,6 +6,7 @@ using OnlineSchool.Courses.Models;
 
 namespace OnlineSchool.Enrolments.Models
 {
+
     public class Enrolment
     {
 

@@ -24,6 +24,12 @@ namespace OnlineSchool.Data
         public virtual DbSet<Book> Books { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Map entities to existing table names created via FluentMigrator
+            modelBuilder.Entity<Student>().ToTable("students");
+            modelBuilder.Entity<Book>().ToTable("books");
+            modelBuilder.Entity<StudentCard>().ToTable("studentscard");
+            modelBuilder.Entity<Course>().ToTable("courses");
+            modelBuilder.Entity<Enrolment>().ToTable("enrolments");
 
             modelBuilder.Entity<Book>()
                 .HasOne(a => a.Student)

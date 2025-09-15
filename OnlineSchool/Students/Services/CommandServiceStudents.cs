@@ -37,18 +37,18 @@ namespace OnlineSchool.Students.Services
 
         public async Task<Student> Update(string id, UpdateRequestStudent request)
         {
-
             var student = await _repository.GetById(id);
             if (student == null)
             {
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-
-            if (student.Age <= 0)
+            // Validate new age if provided
+            if (request.Age.HasValue && request.Age.Value <= 0)
             {
                 throw new InvalidAge(Constants.InvalidAge);
             }
+
             student = await _repository.Update(id, request);
             return student;
         }
