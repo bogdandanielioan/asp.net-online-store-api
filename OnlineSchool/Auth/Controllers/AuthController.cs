@@ -1,134 +1,61 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using OnlineSchool.Auth.Models;
 using OnlineSchool.Auth.Services;
-using OnlineSchool.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace OnlineSchool.Auth.Controllers
 {
-    public record LoginRequest(string Username, string Password);
     public record LoginResponse(string Token, DateTime ExpiresAt, string Role);
+
+    public record LoginRequest
+    {
+        [Required]
+        public string Username { get; init; } = string.Empty;
+
+        [Required]
+        public string Password { get; init; } = string.Empty;
+    }
 
     [ApiController]
     [Route("api/v1/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _config;
-        private readonly AppDbContext? _db;
-        public AuthController(IConfiguration config, AppDbContext? db = null)
+        private readonly IUserAuthenticator _authenticator;
+        private readonly IJwtTokenGenerator _tokenGenerator;
+        private readonly ILogger<AuthController> _logger;
+
+        public AuthController(IUserAuthenticator authenticator, IJwtTokenGenerator tokenGenerator, ILogger<AuthController> logger)
         {
-            _config = config;
-            _db = db;
+            _authenticator = authenticator ?? throw new ArgumentNullException(nameof(authenticator));
+            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public ActionResult<LoginResponse> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
-            if (request is null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            if (request is null)
             {
                 return Unauthorized("Invalid credentials");
             }
 
-            string role = string.Empty;
-            string displayName = request.Username!;
-
-            if (_db != null)
+            if (!ModelState.IsValid)
             {
-                var student = _db.Students.AsNoTracking().FirstOrDefault(s => s.Email == request.Username);
-                if (student != null && !string.IsNullOrEmpty(student.PasswordHash) && !string.IsNullOrEmpty(student.PasswordSalt))
-                {
-                    if (PasswordHasher.Verify(request.Password!, student.PasswordHash!, student.PasswordSalt!))
-                    {
-                        role = string.IsNullOrWhiteSpace(student.Role) ? "User" : student.Role!;
-                        displayName = student.Name;
-                    }
-                    else
-                    {
-                        return Unauthorized("Invalid credentials");
-                    }
-                }
-
-                if (string.IsNullOrEmpty(role))
-                {
-                    var teacher = _db.Teachers.AsNoTracking().FirstOrDefault(t => t.Email == request.Username);
-                    if (teacher != null && !string.IsNullOrEmpty(teacher.PasswordHash) && !string.IsNullOrEmpty(teacher.PasswordSalt))
-                    {
-                        if (PasswordHasher.Verify(request.Password!, teacher.PasswordHash!, teacher.PasswordSalt!))
-                        {
-                            role = string.IsNullOrWhiteSpace(teacher.Role) ? "Admin" : teacher.Role!;
-                            displayName = teacher.Name;
-                        }
-                        else
-                        {
-                            return Unauthorized("Invalid credentials");
-                        }
-                    }
-                }
+                return ValidationProblem(ModelState);
             }
 
-            if (string.IsNullOrEmpty(role))
+            var user = await _authenticator.AuthenticateAsync(request.Username, request.Password, cancellationToken);
+            if (user is null)
             {
-                var users = new Dictionary<string, (string Password, string Role)>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ["admin"] = ("admin", "Admin"),
-                    ["user"] = ("user", "User")
-                };
-
-                if (users.TryGetValue(request.Username!, out var u) && u.Password == request.Password)
-                {
-                    role = u.Role;
-                }
-                else
-                {
-                    return Unauthorized("Invalid credentials");
-                }
+                _logger.LogInformation("Invalid login attempt for {Username}", request.Username);
+                return Unauthorized("Invalid credentials");
             }
 
-            var jwtSection = _config.GetSection("Jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"] ?? string.Empty));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, displayName),
-                new Claim(ClaimTypes.Role, role)
-            };
-
-            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                claims.Add(new Claim("permission", "read"));
-                claims.Add(new Claim("permission", "write"));
-
-                claims.Add(new Claim("permission", "read:student"));
-                claims.Add(new Claim("permission", "write:student"));
-                claims.Add(new Claim("permission", "read:course"));
-                claims.Add(new Claim("permission", "write:course"));
-            }
-            else
-            {
-                claims.Add(new Claim("permission", "read"));
-
-                claims.Add(new Claim("permission", "read:student"));
-                claims.Add(new Claim("permission", "write:student"));
-            }
-
-            var expires = DateTime.UtcNow.AddHours(1);
-            var token = new JwtSecurityToken(
-                issuer: jwtSection["Issuer"],
-                audience: jwtSection["Audience"],
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-            return Ok(new LoginResponse(tokenString, expires, role));
+            var generated = _tokenGenerator.GenerateToken(user);
+            return Ok(new LoginResponse(generated.Token, generated.ExpiresAt, user.Role));
         }
     }
 }

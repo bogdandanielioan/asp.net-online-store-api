@@ -4,6 +4,7 @@ using OnlineSchool.Books.Models;
 using OnlineSchool.Courses.Dto;
 using OnlineSchool.Courses.Models;
 using OnlineSchool.Data;
+using OnlineSchool.Auth.Models;
 using OnlineSchool.Enrolments.Dto;
 using OnlineSchool.Enrolments.Models;
 using OnlineSchool.StudentCards.Models;
@@ -167,7 +168,7 @@ namespace OnlineSchool.Students.Repository
             var student = _mapper.Map<Student>(request);
             student.Id = IdGenerator.New("student");
             // Assign default role to all students
-            student.Role = string.IsNullOrWhiteSpace(student.Role) ? "User" : student.Role;
+            student.Role = string.IsNullOrWhiteSpace(student.Role) ? SystemRoles.User : SystemRoles.Normalize(student.Role);
 
             // Hash and store password if provided
             if (!string.IsNullOrWhiteSpace(request.Password))

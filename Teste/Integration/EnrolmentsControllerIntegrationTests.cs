@@ -13,7 +13,7 @@ public class EnrolmentsControllerIntegrationTests : IClassFixture<CustomWebAppli
 
     public EnrolmentsControllerIntegrationTests(CustomWebApplicationFactory factory)
     {
-        _client = factory.CreateClient();
+        _client = factory.CreateAuthenticatedClient();
     }
 
     [Fact]

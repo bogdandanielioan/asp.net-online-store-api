@@ -18,7 +18,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
     [Fact]
     public async Task Login_Admin_ReturnsToken()
     {
-        var payload = new LoginRequest("admin", "admin");
+        var payload = new LoginRequest { Username = "admin", Password = "admin" };
         var resp = await _client.PostAsJsonAsync("/api/v1/Auth/login", payload);
         Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
         var body = await resp.Content.ReadFromJsonAsync<LoginResponse>(JsonOpts);
@@ -30,7 +30,7 @@ public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplication
     [Fact]
     public async Task Login_Invalid_ReturnsUnauthorized()
     {
-        var payload = new LoginRequest("admin", "wrong");
+        var payload = new LoginRequest { Username = "admin", Password = "wrong" };
         var resp = await _client.PostAsJsonAsync("/api/v1/Auth/login", payload);
         Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
     }

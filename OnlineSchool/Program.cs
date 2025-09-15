@@ -31,7 +31,8 @@ using OnlineSchool.Teachers.Repository.interfaces;
 using OnlineSchool.Teachers.Services;
 using OnlineSchool.Teachers.Services.interfaces;
 using MySqlConnector;
-using OnlineSchool.Auth;
+using OnlineSchool.Auth.Models;
+using OnlineSchool.Auth.Services;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,40 +71,40 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSection["Key"] ?? "");
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<AuthDefaults>(builder.Configuration.GetSection("AuthDefaults"));
+builder.Services.Configure<RolePermissionsOptions>(builder.Configuration.GetSection("RolePermissions"));
+builder.Services.AddSingleton<IRolePermissionResolver, RolePermissionResolver>();
+builder.Services.AddScoped<IUserAuthenticator, UserAuthenticator>();
+builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
-if (builder.Environment.IsEnvironment("Testing"))
+var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+if (jwtOptions is null || string.IsNullOrWhiteSpace(jwtOptions.Key))
 {
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
-        options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
-    })
-    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+    throw new InvalidOperationException("Jwt configuration is missing or incomplete.");
 }
-else
+
+var key = Encoding.UTF8.GetBytes(jwtOptions.Key);
+
+builder.Services.AddAuthentication(options =>
 {
-    builder.Services.AddAuthentication(options =>
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSection["Issuer"],
-            ValidAudience = jwtSection["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
-        };
-    });
-}
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtOptions.Issuer,
+        ValidAudience = jwtOptions.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
 
 builder.Services.AddAuthorization(options =>
 {
@@ -149,7 +150,8 @@ builder.Services.AddFluentMigratorCore()
     .ScanIn(typeof(Program).Assembly).For.Migrations())
     .AddLogging(lb => lb.AddFluentMigratorConsole());
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+// Only scan the current assembly for AutoMapper profiles to avoid loading external runtime assemblies
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
 

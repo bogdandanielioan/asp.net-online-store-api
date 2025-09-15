@@ -1,8 +1,12 @@
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using OnlineSchool.Auth.Models;
+using OnlineSchool.Auth.Services;
 using OnlineSchool.Data;
 using OnlineSchool.Students.Models;
 
@@ -36,6 +40,22 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             db.Database.EnsureCreated();
             Seed(db);
         });
+    }
+
+    public HttpClient CreateAuthenticatedClient(params string[] permissions)
+    {
+        var client = CreateClient();
+        using var scope = Services.CreateScope();
+        var generator = scope.ServiceProvider.GetRequiredService<IJwtTokenGenerator>();
+        var effectivePermissions = (permissions is { Length: > 0 }
+            ? permissions
+            : new[] { "read", "write", "read:student", "write:student", "read:course", "write:course" });
+
+        var claims = effectivePermissions.Select(p => new Claim("permission", p));
+        var user = new AuthenticatedUser("tester@example.com", "Test User", SystemRoles.Admin);
+        var token = generator.GenerateToken(user, claims).Token;
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return client;
     }
 
     private static void Seed(AppDbContext db)

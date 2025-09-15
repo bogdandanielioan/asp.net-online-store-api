@@ -13,7 +13,7 @@ public class BooksControllerIntegrationTests : IClassFixture<CustomWebApplicatio
 
     public BooksControllerIntegrationTests(CustomWebApplicationFactory factory)
     {
-        _client = factory.CreateClient();
+        _client = factory.CreateAuthenticatedClient();
     }
 
     [Fact]

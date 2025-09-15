@@ -1,3 +1,4 @@
+using OnlineSchool.Auth.Models;
 using OnlineSchool.System.Constants;
 using OnlineSchool.System.Exceptions;
 using OnlineSchool.System.Id;
@@ -25,7 +26,7 @@ namespace OnlineSchool.Teachers.Services
             teacher.Id = IdGenerator.New("teacher");
             teacher.UpdateDate = DateTime.UtcNow;
             // Assign default role to all teachers
-            teacher.Role = string.IsNullOrWhiteSpace(teacher.Role) ? "Admin" : teacher.Role;
+            teacher.Role = string.IsNullOrWhiteSpace(teacher.Role) ? SystemRoles.Admin : SystemRoles.Normalize(teacher.Role);
 
             // Hash and store password if provided
             if (!string.IsNullOrWhiteSpace(teacher.Password))

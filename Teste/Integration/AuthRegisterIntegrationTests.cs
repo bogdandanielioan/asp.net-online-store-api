@@ -71,8 +71,6 @@ public class AuthRegisterIntegrationTests : IClassFixture<CustomWebApplicationFa
         {
             Content = JsonContent.Create(create)
         };
-        // Simulate no authentication
-        req.Headers.Add("X-Test-Auth", "none");
 
         var resp = await _client.SendAsync(req);
         Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
@@ -94,7 +92,6 @@ public class AuthRegisterIntegrationTests : IClassFixture<CustomWebApplicationFa
         {
             Content = JsonContent.Create(create)
         };
-        req.Headers.Add("X-Test-Auth", "none");
 
         var resp = await _client.SendAsync(req);
         Assert.Equal(HttpStatusCode.OK, resp.StatusCode);

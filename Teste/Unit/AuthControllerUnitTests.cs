@@ -1,60 +1,117 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using OnlineSchool.Auth.Controllers;
+using OnlineSchool.Auth.Models;
+using OnlineSchool.Auth.Services;
 
 namespace Teste.Unit;
 
 public class AuthControllerUnitTests
 {
-    private static IConfiguration BuildConfig()
+    private static IJwtTokenGenerator BuildTokenGenerator()
     {
-        var dict = new Dictionary<string, string?>
+        var options = Options.Create(new JwtOptions
         {
-            ["Jwt:Issuer"] = "OnlineSchool",
-            ["Jwt:Audience"] = "OnlineSchoolClients",
-            ["Jwt:Key"] = "super_secret_dev_key_change_in_prod_1234567890"
-        };
-        return new ConfigurationBuilder().AddInMemoryCollection(dict!).Build();
+            Issuer = "OnlineSchool",
+            Audience = "OnlineSchoolClients",
+            Key = "super_secret_dev_key_change_in_prod_1234567890"
+        });
+
+        return new JwtTokenGenerator(options, new StaticRolePermissionResolver());
+    }
+
+    private static AuthController BuildController(Dictionary<string, (string Password, string Role)>? defaults = null)
+    {
+        var authenticator = new FakeAuthenticator(defaults);
+        return new AuthController(authenticator, BuildTokenGenerator(), NullLogger<AuthController>.Instance);
     }
 
     [Fact]
-    public void Login_Admin_ContainsAdminRole_And_ReadWritePermissions()
+    public async Task Login_Admin_ContainsAdminRole_And_ReadWritePermissions()
     {
-        var controller = new AuthController(BuildConfig());
-        var result = controller.Login(new LoginRequest("admin", "admin"));
+        var controller = BuildController();
+        var result = await controller.Login(new LoginRequest { Username = "admin", Password = "admin" }, CancellationToken.None);
         var ok = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result.Result);
         var payload = Assert.IsType<LoginResponse>(ok.Value);
 
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(payload.Token);
         var claims = token.Claims.ToList();
-        Assert.Contains(claims, c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        Assert.Contains(claims, c => c.Type == ClaimTypes.Role && c.Value == SystemRoles.Admin);
         Assert.Contains(claims, c => c.Type == "permission" && c.Value == "read");
         Assert.Contains(claims, c => c.Type == "permission" && c.Value == "write");
     }
 
     [Fact]
-    public void Login_User_ContainsUserRole_And_ReadPermissionOnly()
+    public async Task Login_User_ContainsUserRole_And_ReadPermissionOnly()
     {
-        var controller = new AuthController(BuildConfig());
-        var result = controller.Login(new LoginRequest("user", "user"));
+        var controller = BuildController();
+        var result = await controller.Login(new LoginRequest { Username = "user", Password = "user" }, CancellationToken.None);
         var ok = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result.Result);
         var payload = Assert.IsType<LoginResponse>(ok.Value);
 
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(payload.Token);
         var claims = token.Claims.ToList();
-        Assert.Contains(claims, c => c.Type == ClaimTypes.Role && c.Value == "User");
+        Assert.Contains(claims, c => c.Type == ClaimTypes.Role && c.Value == SystemRoles.User);
         Assert.Contains(claims, c => c.Type == "permission" && c.Value == "read");
         Assert.DoesNotContain(claims, c => c.Type == "permission" && c.Value == "write");
     }
 
     [Fact]
-    public void Login_InvalidCredentials_ReturnsUnauthorized()
+    public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
-        var controller = new AuthController(BuildConfig());
-        var result = controller.Login(new LoginRequest("admin", "wrong"));
+        var controller = BuildController();
+        var result = await controller.Login(new LoginRequest { Username = "admin", Password = "wrong" }, CancellationToken.None);
         Assert.IsType<Microsoft.AspNetCore.Mvc.UnauthorizedObjectResult>(result.Result);
+    }
+
+    private sealed class FakeAuthenticator : IUserAuthenticator
+    {
+        private readonly Dictionary<string, (string Password, string Role)> _users;
+
+        public FakeAuthenticator(Dictionary<string, (string Password, string Role)>? defaults)
+        {
+            _users = defaults ?? new Dictionary<string, (string Password, string Role)>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["admin"] = ("admin", SystemRoles.Admin),
+                ["user"] = ("user", SystemRoles.User)
+            };
+        }
+
+        public Task<AuthenticatedUser?> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                return Task.FromResult<AuthenticatedUser?>(null);
+            }
+
+            if (_users.TryGetValue(username, out var info) && info.Password == password)
+            {
+                return Task.FromResult<AuthenticatedUser?>(new AuthenticatedUser(username, username, info.Role));
+            }
+
+            return Task.FromResult<AuthenticatedUser?>(null);
+        }
+    }
+
+    private sealed class StaticRolePermissionResolver : IRolePermissionResolver
+    {
+        public IReadOnlyCollection<string> GetPermissions(string role)
+        {
+            if (string.Equals(role, SystemRoles.Admin, StringComparison.OrdinalIgnoreCase))
+            {
+                return new[] { "read", "write", "read:student", "write:student", "read:course", "write:course" };
+            }
+
+            if (string.Equals(role, SystemRoles.User, StringComparison.OrdinalIgnoreCase))
+            {
+                return new[] { "read", "read:student", "write:student" };
+            }
+
+            return Array.Empty<string>();
+        }
     }
 }
