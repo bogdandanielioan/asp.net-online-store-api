@@ -9,18 +9,18 @@ namespace OnlineSchool.Courses.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-        public string Department { get; set; }
+        public string Department { get; set; } = string.Empty;
 
         // Relation: many courses to one teacher
         public string? TeacherId { get; set; }
         public virtual Teacher? Teacher { get; set; }
 
-        public virtual List<Enrolment> EnrolledStudents { get; set; }
+        public virtual List<Enrolment> EnrolledStudents { get; set; } = new();
     }
 }

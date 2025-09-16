@@ -33,34 +33,21 @@ namespace OnlineSchool.Courses.Services
         {
             var course = await _repository.GetByNameAsync(name);
 
-            if (course == null)
-            {
-                throw new NotFoundCourse(Constants.NotFoundcourse);
-            }
-            return course;
+            return course ?? throw new NotFoundCourse(Constants.NotFoundcourse);
         }
 
         public async Task<Course> GetByName(string name)
         {
             var course = await _repository.GetByName(name);
 
-            if (course == null)
-            {
-                throw new NotFoundCourse(Constants.NotFoundcourse);
-            }
-            return course;
+            return course ?? throw new NotFoundCourse(Constants.NotFoundcourse);
         }
 
         public async Task<DtoCourseView> GetById(string id)
         {
             var course = await _repository.GetByIdAsync(id);
 
-            if (course == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-
-            return course;
+            return course ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
 
 

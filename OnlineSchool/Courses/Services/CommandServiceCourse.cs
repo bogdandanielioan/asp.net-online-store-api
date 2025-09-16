@@ -58,8 +58,9 @@ namespace OnlineSchool.Courses.Services
                 throw new InvalidName(Constants.InvalidName);
             }
 
-            course = await _repository.Update(id, request);
-            return course;
+            var updated = await _repository.Update(id, request)
+                ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
+            return updated;
         }
 
         public async Task<Course> Delete(string id)

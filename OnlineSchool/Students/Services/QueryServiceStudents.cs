@@ -35,35 +35,21 @@ namespace OnlineSchool.Students.Services
         {
             var student = await _repository.GetByNameAsync(name);
 
-            if (student == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-            return student;
+            return student ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
 
         public async Task<DtoStudentView> GetById(string id)
         {
             var student = await _repository.GetByIdAsync(id);
 
-            if (student == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-
-            return student;
+            return student ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
 
         public async Task<StudentCard> CardById(string id)
         {
             var student = await _repository.CardByIdAsync(id);
 
-            if (student == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-
-            return student;
+            return student ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
 
     }

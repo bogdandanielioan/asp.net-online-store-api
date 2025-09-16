@@ -10,16 +10,16 @@ namespace OnlineSchool.StudentCards.Models
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [ForeignKey("IdStudent")]
-        public string IdStudent { get; set; }
+        public string IdStudent { get; set; } = string.Empty;
 
         [JsonIgnore]
-        public virtual Student Student { get; set; }
+        public virtual Student? Student { get; set; }
 
         [Required]
-        public string Namecard { get; set; }
+        public string Namecard { get; set; } = string.Empty;
 
 
     }

@@ -32,12 +32,7 @@ namespace OnlineSchool.Enrolments.Services
         {
             var enrolment = await _repository.GetByIdAsync(id);
 
-            if (enrolment == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-
-            return enrolment;
+            return enrolment ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
 
 

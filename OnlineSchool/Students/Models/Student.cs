@@ -10,13 +10,13 @@ namespace OnlineSchool.Students.Models{
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         public int Age { get; set; }
@@ -42,10 +42,10 @@ namespace OnlineSchool.Students.Models{
             return t;
         }*/
 
-        public virtual List<Book> StudentBooks { get; set; }
+        public virtual List<Book> StudentBooks { get; set; } = new();
 
-        public virtual StudentCard CardNumber { get; set; }
+        public virtual StudentCard? CardNumber { get; set; }
 
-        public virtual List<Enrolment> MyCourses { get; set; }
+        public virtual List<Enrolment> MyCourses { get; set; } = new();
     }
 }

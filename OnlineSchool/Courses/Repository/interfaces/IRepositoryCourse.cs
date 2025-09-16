@@ -9,19 +9,19 @@ namespace OnlineSchool.Courses.Repository.interfaces
     {
         Task<List<DtoCourseView>> GetAllAsync();
 
-        Task<DtoCourseView> GetByNameAsync(string destination);
+        Task<DtoCourseView?> GetByNameAsync(string destination);
 
-        Task<Course> GetByName(string destination);
+        Task<Course?> GetByName(string destination);
 
-        Task<DtoCourseView> GetByIdAsync(string id);
+        Task<DtoCourseView?> GetByIdAsync(string id);
 
-        Task<Course> GetById(string id);
+        Task<Course?> GetById(string id);
 
         Task<Course> Create(CreateRequestCourse request);
 
-        Task<Course> Update(string id, UpdateRequestCourse request);
+        Task<Course?> Update(string id, UpdateRequestCourse request);
 
-        Task<Course> DeleteById(string id);
+        Task<Course?> DeleteById(string id);
 
     }
 }

@@ -7,7 +7,7 @@ namespace OnlineSchool.Students.Dto
 {
     public class DtoStudentView
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Required]
         public string Name { get; set; } = string.Empty;
@@ -23,7 +23,7 @@ namespace OnlineSchool.Students.Dto
 
         public List<Book> StudentBooks { get; set; } = new List<Book>();
 
-        public StudentCard MyCardNumber { get; set; }
+        public StudentCard? MyCardNumber { get; set; }
 
         public List<DtoCourseViewForStudents> MyCourses { get; set; } = new List<DtoCourseViewForStudents>();
 

@@ -10,8 +10,8 @@ namespace OnlineSchool.Enrolments.Repository
     public class RepositoryEnrolment : IRepositoryEnrolment
     {
 
-        private AppDbContext _context;
-        private IMapper _mapper;
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
         public RepositoryEnrolment(AppDbContext context, IMapper mapper)
         {
@@ -21,12 +21,21 @@ namespace OnlineSchool.Enrolments.Repository
 
         public async Task<List<Enrolment>> GetAllAsync()
         {
-            return await _context.Enrolments.AsNoTracking().ToListAsync();
+            return await BuildEnrolmentQuery().ToListAsync();
         }
 
-        public async Task<Enrolment> GetByIdAsync(string id)
+        public async Task<Enrolment?> GetByIdAsync(string id)
         {
-            return await _context.Enrolments.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+            return await BuildEnrolmentQuery()
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        private IQueryable<Enrolment> BuildEnrolmentQuery()
+        {
+            return _context.Enrolments
+                .AsNoTracking()
+                .Include(e => e.Course)
+                .Include(e => e.Student);
         }
 
     }

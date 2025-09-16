@@ -23,12 +23,12 @@ namespace OnlineSchool.Books.Repository
             return await _context.Books.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Book> GetByIdAsync(string id)
+        public async Task<Book?> GetByIdAsync(string id)
         {
             return await _context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public async Task<Book> GetByNameAsync(string name)
+        public async Task<Book?> GetByNameAsync(string name)
         {
             return await _context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Name == name);
         }

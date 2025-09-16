@@ -13,6 +13,7 @@ using OnlineSchool.Students.Models;
 using OnlineSchool.Students.Repository.interfaces;
 using OnlineSchool.System.Id;
 using System;
+using System.Linq;
 
 namespace OnlineSchool.Students.Repository
 {
@@ -30,135 +31,38 @@ namespace OnlineSchool.Students.Repository
 
         public async Task<List<DtoStudentView>> GetAllAsync()
         {
-            var students = await _context.Students
-                .AsNoTracking()
-                .Include(s => s.StudentBooks)
-                .Include(s => s.CardNumber)
-                .Include(s => s.MyCourses)
-                .ToListAsync();
+            var students = await BuildStudentQuery().ToListAsync();
 
-            // Preload courses referenced by students to avoid repeated lookups
-            var allCourseIds = students
-                .SelectMany(s => s.MyCourses.Select(mc => mc.IdCourse))
-                .Distinct()
-                .ToList();
-
-            var coursesById = await _context.Courses
-                .AsNoTracking()
-                .Where(c => allCourseIds.Contains(c.Id))
-                .ToDictionaryAsync(c => c.Id);
-
-            var studentViews = new List<DtoStudentView>(students.Count);
-
-            foreach (var student in students)
-            {
-                var dtoStudentView = new DtoStudentView
-                {
-                    Id = student.Id,
-                    Name = student.Name,
-                    Email = student.Email,
-                    MyCardNumber = student.CardNumber,
-                    StudentBooks = student.StudentBooks,
-                    MyCourses = student.MyCourses
-                        .Select(mc => coursesById.TryGetValue(mc.IdCourse, out var c)
-                            ? new DtoCourseViewForStudents { Name = c.Name, Department = c.Department }
-                            : new DtoCourseViewForStudents())
-                        .ToList(),
-                    Role = student.Role
-                };
-
-                studentViews.Add(dtoStudentView);
-            }
-
-            return studentViews;
+            return students.Select(MapToDto).ToList();
         }
-        public async Task<Student> GetById(string id)
+        public async Task<Student?> GetById(string id)
+        {
+            return await BuildStudentQuery()
+                .FirstOrDefaultAsync(s => s.Id == id);
+        }
+        public async Task<DtoStudentView?> GetByIdAsync(string id)
+        {
+            var student = await BuildStudentQuery()
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            return student == null ? null : MapToDto(student);
+        }
+
+        public async Task<StudentCard?> CardByIdAsync(string id)
         {
             return await _context.Students
                 .AsNoTracking()
-                .Include(s => s.StudentBooks)
-                .Include(s => s.CardNumber)
-                .Include(s => s.MyCourses)
-                .FirstOrDefaultAsync(s => s.Id == id);
-        }
-        public async Task<DtoStudentView> GetByIdAsync(string id)
-        {
-            var student = await _context.Students
-                .AsNoTracking()
-                .Include(s => s.StudentBooks)
-                .Include(s => s.CardNumber)
-                .Include(s => s.MyCourses)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            if (student == null) return null;
-
-            var courseIds = student.MyCourses.Select(mc => mc.IdCourse).Distinct().ToList();
-            var coursesById = await _context.Courses
-                .AsNoTracking()
-                .Where(c => courseIds.Contains(c.Id))
-                .ToDictionaryAsync(c => c.Id);
-
-            var dtoStudentView = new DtoStudentView
-            {
-                Id = student.Id,
-                Name = student.Name,
-                Email = student.Email,
-                MyCardNumber = student.CardNumber,
-                StudentBooks = student.StudentBooks,
-                MyCourses = student.MyCourses
-                    .Select(mc => coursesById.TryGetValue(mc.IdCourse, out var c)
-                        ? new DtoCourseViewForStudents { Name = c.Name, Department = c.Department }
-                        : new DtoCourseViewForStudents())
-                    .ToList(),
-                Role = student.Role
-            };
-
-            return dtoStudentView;
+                .Where(s => s.Id == id)
+                .Select(s => s.CardNumber)
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<StudentCard> CardByIdAsync(string id)
+        public async Task<DtoStudentView?> GetByNameAsync(string name)
         {
-            var student = await _context.Students
-                .AsNoTracking()
-                .Include(s => s.CardNumber)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            return student?.CardNumber;
-        }
-
-        public async Task<DtoStudentView> GetByNameAsync(string name)
-        {
-            var student = await _context.Students
-                .AsNoTracking()
-                .Include(s => s.StudentBooks)
-                .Include(s => s.CardNumber)
-                .Include(s => s.MyCourses)
+            var student = await BuildStudentQuery()
                 .FirstOrDefaultAsync(s => s.Name == name);
 
-            if (student == null) return null;
-
-            var courseIds = student.MyCourses.Select(mc => mc.IdCourse).Distinct().ToList();
-            var coursesById = await _context.Courses
-                .AsNoTracking()
-                .Where(c => courseIds.Contains(c.Id))
-                .ToDictionaryAsync(c => c.Id);
-
-            var dtoStudentView = new DtoStudentView
-            {
-                Id = student.Id,
-                Name = student.Name,
-                Email = student.Email,
-                MyCardNumber = student.CardNumber,
-                StudentBooks = student.StudentBooks,
-                MyCourses = student.MyCourses
-                    .Select(mc => coursesById.TryGetValue(mc.IdCourse, out var c)
-                        ? new DtoCourseViewForStudents { Name = c.Name, Department = c.Department }
-                        : new DtoCourseViewForStudents())
-                    .ToList(),
-                Role = student.Role
-            };
-
-            return dtoStudentView;
+            return student == null ? null : MapToDto(student);
         }
 
 
@@ -191,25 +95,30 @@ namespace OnlineSchool.Students.Repository
             return student;
         }
 
-        public async Task<Student> Update(string id, UpdateRequestStudent request)
+        public async Task<Student?> Update(string id, UpdateRequestStudent request)
         {
 
             var student = await _context.Students.FindAsync(id);
 
+            if (student == null)
+                return null;
+
             student.Age = request.Age ?? student.Age;
             student.Email = request.Email ?? student.Email;
             student.Name = request.Name ?? student.Name;
-            student.UpdateDate = DateTime.Now;
-            _context.Students.Update(student);
+            student.UpdateDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
             return student;
         }
 
-        public async Task<Student> DeleteById(string id)
+        public async Task<Student?> DeleteById(string id)
         {
             var student = await _context.Students.FindAsync(id);
+
+            if (student == null)
+                return null;
 
             _context.Students.Remove(student);
 
@@ -218,132 +127,157 @@ namespace OnlineSchool.Students.Repository
             return student;
         }
 
-        public async Task<Student> CreateBookForStudent(string idStudent, BookCreateDTO createRequestBook)
+        public async Task<Student?> CreateBookForStudent(string idStudent, BookCreateDTO createRequestBook)
         {
             var student = await _context.Students.FindAsync(idStudent);
 
+            if (student == null)
+                return null;
 
-            Book book = _mapper.Map<Book>(createRequestBook);
+            var book = _mapper.Map<Book>(createRequestBook);
             book.Id = IdGenerator.New("book");
+            book.IdStudent = student.Id;
 
-            if (student.StudentBooks == null)
-                _context.Entry(student).Collection(s => s.StudentBooks).Load();
+            var booksEntry = _context.Entry(student).Collection(s => s.StudentBooks);
+            if (!booksEntry.IsLoaded)
+                await booksEntry.LoadAsync();
 
-            if (student.StudentBooks == null)
-               student.StudentBooks = new List<Book>();
-
+            student.StudentBooks ??= new List<Book>();
 
             student.StudentBooks.Add(book);
-          //  _context.Students.Update(student);
+
             await _context.SaveChangesAsync();
             return student;
 
         }
 
-        public async Task<Student> UpdateBookForStudent(string idStudent,string idBook, BookUpdateDTO bookUpdateDTO)
+        public async Task<Student?> UpdateBookForStudent(string idStudent,string idBook, BookUpdateDTO bookUpdateDTO)
         {
             var student = await _context.Students.FindAsync(idStudent);
 
-            // Ensure books are loaded
-            if (student.StudentBooks == null)
-                _context.Entry(student).Collection(s => s.StudentBooks).Load();
+            if (student == null)
+                return null;
 
-            var books = student.StudentBooks ?? new List<Book>();
-            Book? book = null;
-            for (int i = 0; i < books.Count; i++)
-            {
-                if (books[i].Id == idBook)
-                {
-                    book = books[i];
-                    break;
-                }
-            }
+            var booksEntry = _context.Entry(student).Collection(s => s.StudentBooks);
+            if (!booksEntry.IsLoaded)
+                await booksEntry.LoadAsync();
+
+            var book = student.StudentBooks?.FirstOrDefault(b => b.Id == idBook);
 
             if (book == null)
-            {
-                return student; // no change; upper layers may decide behavior
-            }
+                return student;
 
             book.Name = bookUpdateDTO.Name ?? book.Name;
             book.Created = bookUpdateDTO.Created_at ?? book.Created;
 
-            _context.Update(book);
-
             await _context.SaveChangesAsync();
 
             return student;
         }
 
-        public async Task<Student> DeleteBookForStudent(string idStudent, string idBook)
+        public async Task<Student?> DeleteBookForStudent(string idStudent, string idBook)
         {
             var student = await _context.Students.FindAsync(idStudent);
 
-            // Ensure books are loaded
-            if (student.StudentBooks == null)
-                _context.Entry(student).Collection(s => s.StudentBooks).Load();
+            if (student == null)
+                return null;
 
-            var books = student.StudentBooks ?? new List<Book>();
-            Book? book = null;
-            for (int i = 0; i < books.Count; i++)
-            {
-                if (books[i].Id == idBook)
-                {
-                    book = books[i];
-                    break;
-                }
-            }
+            var booksEntry = _context.Entry(student).Collection(s => s.StudentBooks);
+            if (!booksEntry.IsLoaded)
+                await booksEntry.LoadAsync();
+
+            var book = student.StudentBooks?.FirstOrDefault(b => b.Id == idBook);
 
             if (book != null)
             {
                 _context.Books.Remove(book);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
 
             return student;
         }
 
-        public async Task<Student> EnrollmentCourse(string idStudent, Course course)
+        public async Task<Student?> EnrollmentCourse(string idStudent, Course course)
         {
             var student = await _context.Students.FindAsync(idStudent);
+
+            if (student == null)
+                return null;
 
             var requestEnrolment = new CreateRequestEnrolment
             {
-                Created = DateTime.Now,
+                Created = DateTime.UtcNow,
                 IdCourse = course.Id
             };
 
-            Enrolment enrolment = _mapper.Map<Enrolment>(requestEnrolment);
+            var enrolment = _mapper.Map<Enrolment>(requestEnrolment);
             enrolment.Id = IdGenerator.New("enrolment");
-
             enrolment.IdStudent = idStudent;
-            if (student.MyCourses == null)
-                _context.Entry(student).Collection(s => s.MyCourses).Load();
 
-            if (student.MyCourses == null)
-                student.MyCourses = new List<Enrolment>();
+            var coursesEntry = _context.Entry(student).Collection(s => s.MyCourses);
+            if (!coursesEntry.IsLoaded)
+                await coursesEntry.LoadAsync();
 
-            if (student.MyCourses.Find(n => n.IdCourse == enrolment.IdCourse) != null)
+            student.MyCourses ??= new List<Enrolment>();
+
+            if (student.MyCourses.Any(n => n.IdCourse == enrolment.IdCourse))
                 return null;
 
             _context.Enrolments.Add(enrolment);
-           // student.MyCourses.Add(enrolment);
 
             await _context.SaveChangesAsync();
             return student;
         }
 
-        public async Task<Student> UnEnrollmentCourse(string idStudent, Course course)
+        public async Task<Student?> UnEnrollmentCourse(string idStudent, Course course)
         {
             var student = await _context.Students.FindAsync(idStudent);
 
-            var entrolment = await _context.Enrolments.FirstOrDefaultAsync(n => n.IdCourse == course.Id && n.IdStudent == idStudent);
+            if (student == null)
+                return null;
 
-            _context.Enrolments.Remove(entrolment);
-            // student.MyCourses.Add(enrolment);
+            var enrolment = await _context.Enrolments
+                .FirstOrDefaultAsync(n => n.IdCourse == course.Id && n.IdStudent == idStudent);
+
+            if (enrolment == null)
+                return null;
+
+            _context.Enrolments.Remove(enrolment);
 
             await _context.SaveChangesAsync();
             return student;
+        }
+
+        private IQueryable<Student> BuildStudentQuery()
+        {
+            return _context.Students
+                .AsNoTracking()
+                .Include(s => s.StudentBooks)
+                .Include(s => s.CardNumber)
+                .Include(s => s.MyCourses)
+                    .ThenInclude(e => e.Course);
+        }
+
+        private static DtoStudentView MapToDto(Student student)
+        {
+            return new DtoStudentView
+            {
+                Id = student.Id,
+                Name = student.Name,
+                Email = student.Email,
+                MyCardNumber = student.CardNumber,
+                StudentBooks = student.StudentBooks ?? new List<Book>(),
+                MyCourses = student.MyCourses == null
+                    ? new List<DtoCourseViewForStudents>()
+                    : student.MyCourses
+                        .Select(mc => new DtoCourseViewForStudents
+                        {
+                            Name = mc.Course?.Name ?? string.Empty,
+                            Department = mc.Course?.Department ?? string.Empty
+                        })
+                        .ToList(),
+                Role = student.Role
+            };
         }
     }
 }

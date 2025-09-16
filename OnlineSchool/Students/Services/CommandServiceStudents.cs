@@ -49,8 +49,9 @@ namespace OnlineSchool.Students.Services
                 throw new InvalidAge(Constants.InvalidAge);
             }
 
-            student = await _repository.Update(id, request);
-            return student;
+            var updated = await _repository.Update(id, request)
+                ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
+            return updated;
         }
 
         public async Task<Student> Delete(string id)
@@ -78,9 +79,10 @@ namespace OnlineSchool.Students.Services
                 throw new InvalidName(Constants.InvalidName);
             }
 
-            student = await _repository.CreateBookForStudent(idStudent,createRequestBook);
+            var updated = await _repository.CreateBookForStudent(idStudent,createRequestBook)
+                ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
 
-            return student;
+            return updated;
         }
 
         public async Task<Student> UpdateBookForStudent(string idStudent, string idBook, BookUpdateDTO bookUpdateDTO)
@@ -91,8 +93,8 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-            var books = student.StudentBooks;
-            var book = (Book)null;
+            var books = student.StudentBooks ?? new List<Book>();
+            Book? book = null;
             for(int i = 0; i < books.Count; i++)
             {
                 if (books[i].Id == idBook)
@@ -112,8 +114,9 @@ namespace OnlineSchool.Students.Services
                 throw new InvalidName(Constants.InvalidName);
             }
 
-            student = await _repository.UpdateBookForStudent(idStudent,idBook, bookUpdateDTO);
-            return student;
+            var updated = await _repository.UpdateBookForStudent(idStudent,idBook, bookUpdateDTO)
+                ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
+            return updated;
         }
 
         public async Task<Student> DeleteBookForStudent(string idStudent, string idBook)
@@ -124,8 +127,8 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-            var books = student.StudentBooks;
-            var book = (Book)null;
+            var books = student.StudentBooks ?? new List<Book>();
+            Book? book = null;
             for (int i = 0; i < books.Count; i++)
             {
                 if (books[i].Id == idBook)
@@ -140,7 +143,8 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-             await _repository.DeleteBookForStudent(idStudent, idBook);
+            _ = await _repository.DeleteBookForStudent(idStudent, idBook)
+                ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             return student;
         }
 
@@ -152,15 +156,14 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-            student = await _repository.EnrollmentCourse(idStudent, course);
+            var result = await _repository.EnrollmentCourse(idStudent, course);
 
-            if (student == null)
+            if (result == null)
             {
                 throw new InvalidCourse(Constants.InvalidCourse);
             }
 
-
-            return student;
+            return result;
         }
 
         public async Task<Student> UnEnrollmentCourse(string idStudent, Course course)
@@ -171,15 +174,14 @@ namespace OnlineSchool.Students.Services
                 throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
             }
 
-            student = await _repository.UnEnrollmentCourse(idStudent, course);
+            var result = await _repository.UnEnrollmentCourse(idStudent, course);
 
-            if (student == null)
+            if (result == null)
             {
                 throw new ItemsDoNotExist(Constants.ItemDoesNotExist);
             }
 
-
-            return student;
+            return result;
         }
     }
 }

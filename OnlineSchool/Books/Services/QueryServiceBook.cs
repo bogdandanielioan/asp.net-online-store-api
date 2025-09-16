@@ -32,24 +32,14 @@ namespace OnlineSchool.Books.Services
         {
             var book = await _repo.GetByIdAsync(id);
 
-            if(book == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-
-            return book;
+            return book ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
 
         public async Task<Book> GetByNameAsync(string name)
         {
             var book = await _repo.GetByNameAsync(name);
 
-            if (book == null)
-            {
-                throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-            }
-
-            return book;
+            return book ?? throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
         }
     }
 }

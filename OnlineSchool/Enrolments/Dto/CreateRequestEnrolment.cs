@@ -4,7 +4,7 @@ namespace OnlineSchool.Enrolments.Dto
 {
     public class CreateRequestEnrolment
     {
-        public string IdCourse { get; set; }
+        public string IdCourse { get; set; } = string.Empty;
 
         public DateTime Created { get; set; }
     }

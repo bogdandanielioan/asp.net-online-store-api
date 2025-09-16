@@ -18,12 +18,12 @@ namespace OnlineSchool.Data
 
         }
 
-        public virtual DbSet<Enrolment> Enrolments { get; set; }
-        public virtual DbSet<Course> Courses { get; set; }
-        public virtual DbSet<StudentCard> Studentscard { get; set; }
-        public virtual DbSet<Student> Students { get; set; }
-        public virtual DbSet<Book> Books { get; set; }
-        public virtual DbSet<Teacher> Teachers { get; set; }
+        public virtual DbSet<Enrolment> Enrolments { get; set; } = null!;
+        public virtual DbSet<Course> Courses { get; set; } = null!;
+        public virtual DbSet<StudentCard> Studentscard { get; set; } = null!;
+        public virtual DbSet<Student> Students { get; set; } = null!;
+        public virtual DbSet<Book> Books { get; set; } = null!;
+        public virtual DbSet<Teacher> Teachers { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Student>().ToTable("students");
