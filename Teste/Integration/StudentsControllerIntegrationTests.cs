@@ -39,6 +39,13 @@ public class StudentsControllerIntegrationTests : IClassFixture<CustomWebApplica
     }
 
     [Fact]
+    public async Task GetById_ReturnsNotFound_ForMissing()
+    {
+        var resp = await _client.GetAsync("/api/v1/ControllerStudent/findById?id=ghost");
+        Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    [Fact]
     public async Task GetByName_ReturnsNotFound_WhenMissing()
     {
         var resp = await _client.GetAsync("/api/v1/ControllerStudent/findByName?name=Ghost");

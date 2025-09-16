@@ -1,56 +1,44 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OnlineSchool.Enrolments.Dto;
-using OnlineSchool.Enrolments.Models;
-using OnlineSchool.Enrolments.Services.interfaces;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using OnlineSchool.Enrolments.Controllers.interfaces;
+using OnlineSchool.Enrolments.Features.Queries;
+using OnlineSchool.Enrolments.Models;
 using OnlineSchool.System.Exceptions;
-using OnlineSchool.Students.Models;
-using OnlineSchool.System.Constants;
 
-namespace OnlineSchool.Enrolments.Controllers
+namespace OnlineSchool.Enrolments.Controllers;
+
+public class ControllerEnrolment : ControllerAPIEnrolment
 {
-    public class ControllerEnrolment : ControllerAPIEnrolment
+    private readonly IMediator _mediator;
+
+    public ControllerEnrolment(IMediator mediator)
     {
-        private IQueryServiceEnrolment _queryService;
+        _mediator = mediator;
+    }
 
-        public ControllerEnrolment(IQueryServiceEnrolment queryService)
+    public override async Task<ActionResult<List<Enrolment>>> GetEnrolments()
+    {
+        try
         {
-            _queryService = queryService;
+            var enrolments = await _mediator.Send(new GetEnrolmentsQuery());
+            return Ok(enrolments);
         }
-
-        public override async Task<ActionResult<List<Enrolment>>> GetEnrolments()
+        catch (ItemsDoNotExist ex)
         {
-            try
-            {
-                var enromlemts = await _queryService.GetAll();
-
-                return Ok(enromlemts);
-
-            }
-            catch (ItemsDoNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<Enrolment>> GetById([FromQuery] string id)
+    public override async Task<ActionResult<Enrolment>> GetById([FromQuery] string id)
+    {
+        try
         {
-
-            try
-            {
-                var enromlemt = await _queryService.GetById(id);
-                if (enromlemt == null)
-                {
-                    throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-                }
-                return Ok(enromlemt);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
-
+            var enrolment = await _mediator.Send(new GetEnrolmentByIdQuery(id));
+            return Ok(enrolment);
         }
-
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

@@ -1,8 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using MediatR;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Moq;
 using OnlineSchool.Auth.Controllers;
+using OnlineSchool.Auth.Features.Commands;
 using OnlineSchool.Auth.Models;
 using OnlineSchool.Auth.Services;
 
@@ -22,17 +25,27 @@ public class AuthControllerUnitTests
         return new JwtTokenGenerator(options, new StaticRolePermissionResolver());
     }
 
-    private static AuthController BuildController(Dictionary<string, (string Password, string Role)>? defaults = null)
+    private static AuthController CreateController(Mock<IMediator> mediator)
     {
-        var authenticator = new FakeAuthenticator(defaults);
-        return new AuthController(authenticator, BuildTokenGenerator(), NullLogger<AuthController>.Instance);
+        return new AuthController(mediator.Object, NullLogger<AuthController>.Instance);
     }
 
     [Fact]
     public async Task Login_Admin_ContainsAdminRole_And_ReadWritePermissions()
     {
-        var controller = BuildController();
+        var generator = BuildTokenGenerator();
+        var mediator = new Mock<IMediator>();
+        mediator.Setup(m => m.Send(It.Is<LoginCommand>(cmd => cmd.Username == "admin" && cmd.Password == "admin"), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() =>
+            {
+                var user = new AuthenticatedUser("admin", "admin", SystemRoles.Admin);
+                var generated = generator.GenerateToken(user);
+                return new LoginResult(generated.Token, generated.ExpiresAt, user.Role);
+            });
+
+        var controller = CreateController(mediator);
         var result = await controller.Login(new LoginRequest { Username = "admin", Password = "admin" }, CancellationToken.None);
+
         var ok = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result.Result);
         var payload = Assert.IsType<LoginResponse>(ok.Value);
 
@@ -47,8 +60,19 @@ public class AuthControllerUnitTests
     [Fact]
     public async Task Login_User_ContainsUserRole_And_ReadPermissionOnly()
     {
-        var controller = BuildController();
+        var generator = BuildTokenGenerator();
+        var mediator = new Mock<IMediator>();
+        mediator.Setup(m => m.Send(It.Is<LoginCommand>(cmd => cmd.Username == "user" && cmd.Password == "user"), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() =>
+            {
+                var user = new AuthenticatedUser("user", "user", SystemRoles.User);
+                var generated = generator.GenerateToken(user);
+                return new LoginResult(generated.Token, generated.ExpiresAt, user.Role);
+            });
+
+        var controller = CreateController(mediator);
         var result = await controller.Login(new LoginRequest { Username = "user", Password = "user" }, CancellationToken.None);
+
         var ok = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result.Result);
         var payload = Assert.IsType<LoginResponse>(ok.Value);
 
@@ -63,38 +87,14 @@ public class AuthControllerUnitTests
     [Fact]
     public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
-        var controller = BuildController();
+        var mediator = new Mock<IMediator>();
+        mediator.Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((LoginResult?)null);
+
+        var controller = CreateController(mediator);
         var result = await controller.Login(new LoginRequest { Username = "admin", Password = "wrong" }, CancellationToken.None);
+
         Assert.IsType<Microsoft.AspNetCore.Mvc.UnauthorizedObjectResult>(result.Result);
-    }
-
-    private sealed class FakeAuthenticator : IUserAuthenticator
-    {
-        private readonly Dictionary<string, (string Password, string Role)> _users;
-
-        public FakeAuthenticator(Dictionary<string, (string Password, string Role)>? defaults)
-        {
-            _users = defaults ?? new Dictionary<string, (string Password, string Role)>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["admin"] = ("admin", SystemRoles.Admin),
-                ["user"] = ("user", SystemRoles.User)
-            };
-        }
-
-        public Task<AuthenticatedUser?> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            {
-                return Task.FromResult<AuthenticatedUser?>(null);
-            }
-
-            if (_users.TryGetValue(username, out var info) && info.Password == password)
-            {
-                return Task.FromResult<AuthenticatedUser?>(new AuthenticatedUser(username, username, info.Role));
-            }
-
-            return Task.FromResult<AuthenticatedUser?>(null);
-        }
     }
 
     private sealed class StaticRolePermissionResolver : IRolePermissionResolver

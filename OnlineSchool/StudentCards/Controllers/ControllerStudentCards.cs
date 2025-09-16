@@ -1,75 +1,57 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OnlineSchool.Books.Models;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using OnlineSchool.StudentCards.Controllers.interfaces;
+using OnlineSchool.StudentCards.Features.Queries;
 using OnlineSchool.StudentCards.Models;
-using OnlineSchool.StudentCards.Services.interfaces;
-using OnlineSchool.System.Constants;
 using OnlineSchool.System.Exceptions;
 
-namespace OnlineSchool.StudentCards.Controllers
+namespace OnlineSchool.StudentCards.Controllers;
+
+public class ControllerStudentCards : ControllerAPIStudentCards
 {
-    public class ControllerStudentCards : ControllerAPIStudentCards
+    private readonly IMediator _mediator;
+
+    public ControllerStudentCards(IMediator mediator)
     {
-        private IQueryServiceStudentCard _queryService;
+        _mediator = mediator;
+    }
 
-        public ControllerStudentCards(IQueryServiceStudentCard queryService)
+    public override async Task<ActionResult<List<StudentCard>>> GetStudentCards()
+    {
+        try
         {
-            _queryService = queryService;
+            var students = await _mediator.Send(new GetStudentCardsQuery());
+            return Ok(students);
         }
-
-        public override async Task<ActionResult<List<StudentCard>>> GetStudentCards()
+        catch (ItemsDoNotExist ex)
         {
-            try
-            {
-                var students = await _queryService.GetAll();
-
-                return Ok(students);
-
-            }
-            catch (ItemsDoNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<StudentCard>> GetByName([FromQuery] string name)
+    public override async Task<ActionResult<StudentCard>> GetByName([FromQuery] string name)
+    {
+        try
         {
-
-            try
-            {
-                var student = await _queryService.GetByNameAsync(name);
-                if (student == null)
-                {
-                    throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-                }
-                return Ok(student);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
-
+            var student = await _mediator.Send(new GetStudentCardByNameQuery(name));
+            return Ok(student);
         }
-
-        public override async Task<ActionResult<StudentCard>> GetById([FromQuery] string id)
+        catch (ItemDoesNotExist ex)
         {
-
-            try
-            {
-                var student = await _queryService.GetById(id);
-                if (student == null)
-                {
-                    throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-                }
-                return Ok(student);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
-
+            return NotFound(ex.Message);
         }
+    }
 
-
+    public override async Task<ActionResult<StudentCard>> GetById([FromQuery] string id)
+    {
+        try
+        {
+            var student = await _mediator.Send(new GetStudentCardByIdQuery(id));
+            return Ok(student);
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

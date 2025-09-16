@@ -1,131 +1,117 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OnlineSchool.System.Constants;
 using OnlineSchool.System.Exceptions;
 using OnlineSchool.Teachers.Controllers.interfaces;
 using OnlineSchool.Teachers.Dto;
+using OnlineSchool.Teachers.Features.Commands;
+using OnlineSchool.Teachers.Features.Queries;
 using OnlineSchool.Teachers.Models;
-using OnlineSchool.Teachers.Services.interfaces;
+using System.Linq;
 
-namespace OnlineSchool.Teachers.Controllers
+namespace OnlineSchool.Teachers.Controllers;
+
+public class ControllerTeacher : ControllerAPITeacher
 {
-    public class ControllerTeacher : ControllerAPITeacher
+    private readonly IMediator _mediator;
+
+    public ControllerTeacher(IMediator mediator)
     {
-        private readonly IQueryServiceTeacher _queryService;
-        private readonly ICommandServiceTeacher _commandService;
+        _mediator = mediator;
+    }
 
-        public ControllerTeacher(IQueryServiceTeacher queryService, ICommandServiceTeacher commandService)
+    private static DtoTeacherView MapToDto(Teacher t)
+    {
+        return new DtoTeacherView
         {
-            _queryService = queryService;
-            _commandService = commandService;
+            Id = t.Id,
+            Name = t.Name,
+            Email = t.Email,
+            Subject = t.Subject,
+            UpdateDate = t.UpdateDate,
+            Role = t.Role
+        };
+    }
+
+    public override async Task<ActionResult<List<DtoTeacherView>>> GetTeachers()
+    {
+        try
+        {
+            var items = await _mediator.Send(new GetTeachersQuery());
+            var dtos = items.Select(MapToDto).ToList();
+            return Ok(dtos);
         }
-
-        private static DtoTeacherView MapToDto(Teacher t)
+        catch (ItemsDoNotExist ex)
         {
-            return new DtoTeacherView
-            {
-                Id = t.Id,
-                Name = t.Name,
-                Email = t.Email,
-                Subject = t.Subject,
-                UpdateDate = t.UpdateDate,
-                Role = t.Role
-            };
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<List<DtoTeacherView>>> GetTeachers()
+    public override async Task<ActionResult<DtoTeacherView>> GetById([FromQuery] string id)
+    {
+        try
         {
-            try
-            {
-                var items = await _queryService.GetAllAsync();
-                var dtos = items.Select(MapToDto).ToList();
-                return Ok(dtos);
-            }
-            catch (ItemsDoNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var item = await _mediator.Send(new GetTeacherByIdQuery(id));
+            return Ok(MapToDto(item));
         }
-
-        public override async Task<ActionResult<DtoTeacherView>> GetById([FromQuery] string id)
+        catch (ItemDoesNotExist ex)
         {
-            try
-            {
-                var item = await _queryService.GetByIdAsync(id);
-                return Ok(MapToDto(item));
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<DtoTeacherView>> GetByEmail([FromQuery] string email)
+    public override async Task<ActionResult<DtoTeacherView>> GetByEmail([FromQuery] string email)
+    {
+        try
         {
-            try
-            {
-                var item = await _queryService.GetByEmailAsync(email);
-                return Ok(MapToDto(item));
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var item = await _mediator.Send(new GetTeacherByEmailQuery(email));
+            return Ok(MapToDto(item));
         }
-
-        public override async Task<ActionResult<DtoTeacherView>> Create([FromBody] TeacherCreateRequest request)
+        catch (ItemDoesNotExist ex)
         {
-            try
-            {
-                var teacher = new Teacher
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Subject = request.Subject,
-                    Password = request.Password
-                };
-                var created = await _commandService.CreateAsync(teacher);
-                return Ok(MapToDto(created));
-            }
-            catch (InvalidName ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<DtoTeacherView>> Update([FromQuery] string id, [FromBody] TeacherUpdateRequest request)
+    public override async Task<ActionResult<DtoTeacherView>> Create([FromBody] TeacherCreateRequest request)
+    {
+        try
         {
-            try
-            {
-                var teacher = new Teacher
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Subject = request.Subject
-                };
-                var updated = await _commandService.UpdateAsync(id, teacher);
-                return Ok(MapToDto(updated));
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidName ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var created = await _mediator.Send(new CreateTeacherCommand(request.Name, request.Email, request.Subject, request.Password));
+            return Ok(MapToDto(created));
         }
-
-        public override async Task<ActionResult<DtoTeacherView>> Delete([FromQuery] string id)
+        catch (InvalidName ex)
         {
-            try
-            {
-                var deleted = await _commandService.DeleteAsync(id);
-                return Ok(MapToDto(deleted));
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return BadRequest(ex.Message);
+        }
+    }
+
+    public override async Task<ActionResult<DtoTeacherView>> Update([FromQuery] string id, [FromBody] TeacherUpdateRequest request)
+    {
+        try
+        {
+            var updated = await _mediator.Send(new UpdateTeacherCommand(id, request.Name, request.Email, request.Subject));
+            return Ok(MapToDto(updated));
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (InvalidName ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    public override async Task<ActionResult<DtoTeacherView>> Delete([FromQuery] string id)
+    {
+        try
+        {
+            var deleted = await _mediator.Send(new DeleteTeacherCommand(id));
+            return Ok(MapToDto(deleted));
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
         }
     }
 }

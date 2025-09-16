@@ -1,4 +1,5 @@
 using FluentMigrator.Runner;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -152,6 +153,7 @@ builder.Services.AddFluentMigratorCore()
 
 // Only scan the current assembly for AutoMapper profiles to avoid loading external runtime assemblies
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 

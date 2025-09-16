@@ -1,70 +1,57 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using OnlineSchool.Books.Controllers.interfaces;
+using OnlineSchool.Books.Features.Queries;
 using OnlineSchool.Books.Models;
-using OnlineSchool.Books.Services.interfaces;
-using OnlineSchool.System.Constants;
 using OnlineSchool.System.Exceptions;
 
-namespace OnlineSchool.Books.Controllers
+namespace OnlineSchool.Books.Controllers;
+
+public class ControllerBook : ControllerAPIBook
 {
-    public class ControllerBook : ControllerAPIBook
+    private readonly IMediator _mediator;
+
+    public ControllerBook(IMediator mediator)
     {
+        _mediator = mediator;
+    }
 
-        private IQueryServiceBook _query;
-
-        public ControllerBook(IQueryServiceBook query)
+    public override async Task<ActionResult<List<Book>>> GetBooks()
+    {
+        try
         {
-            _query = query;
+            var books = await _mediator.Send(new GetBooksQuery());
+            return Ok(books);
         }
-
-
-        public override async Task<ActionResult<List<Book>>> GetBooks()
+        catch (ItemsDoNotExist ex)
         {
-            try
-            {
-                var book = await _query.GetAllAsync();
-
-                return Ok(book);
-            }
-            catch (ItemsDoNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
-        public override async Task<ActionResult<Book>> GetById([FromQuery] string id)
+    }
+
+    public override async Task<ActionResult<Book>> GetById([FromQuery] string id)
+    {
+        try
         {
-            try
-            {
-                var book = await _query.GetByIdAsync(id);
-
-                if (book == null)
-                {
-                    throw new ItemDoesNotExist(Constants.ItemDoesNotExist); 
-                }
-                return Ok(book);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var book = await _mediator.Send(new GetBookByIdQuery(id));
+            return Ok(book);
         }
-
-        public override async Task<ActionResult<Book>> GetByName([FromQuery] string name)
+        catch (ItemDoesNotExist ex)
         {
-            try
-            {
-                var book = await _query.GetByNameAsync(name);
-                if (book == null)
-                {
-                    throw new ItemDoesNotExist(Constants.ItemDoesNotExist);
-                }
-                return Ok(book);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
+    public override async Task<ActionResult<Book>> GetByName([FromQuery] string name)
+    {
+        try
+        {
+            var book = await _mediator.Send(new GetBookByNameQuery(name));
+            return Ok(book);
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

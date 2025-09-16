@@ -1,113 +1,106 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using OnlineSchool.Courses.Controllers.interfaces;
 using OnlineSchool.Courses.Dto;
+using OnlineSchool.Courses.Features.Commands;
+using OnlineSchool.Courses.Features.Queries;
 using OnlineSchool.Courses.Models;
-using OnlineSchool.Courses.Services.interfaces;
 using OnlineSchool.System.Exceptions;
 
-namespace OnlineSchool.Courses.Controllers
+namespace OnlineSchool.Courses.Controllers;
+
+public class ControllerCourse : ControllerAPICourse
 {
-    public class ControllerCourse : ControllerAPICourse
+    private readonly IMediator _mediator;
+
+    public ControllerCourse(IMediator mediator)
     {
-        private IQueryServiceCourse _queryService;
-        private ICommandServiceCourse _commandService;
+        _mediator = mediator;
+    }
 
-        public ControllerCourse(IQueryServiceCourse queryService, ICommandServiceCourse commandService)
+    public override async Task<ActionResult<List<DtoCourseView>>> GetCourses()
+    {
+        try
         {
-            _queryService = queryService;
-            _commandService = commandService;
+            var courses = await _mediator.Send(new GetCoursesQuery());
+            return Ok(courses);
         }
-
-        public override async Task<ActionResult<List<DtoCourseView>>> GetCourses()
+        catch (ItemsDoNotExist ex)
         {
-            try
-            {
-                var courses = await _queryService.GetAll();
-
-                return Ok(courses);
-
-            }
-            catch (ItemsDoNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<DtoCourseView>> GetByName([FromQuery] string name)
+    public override async Task<ActionResult<DtoCourseView>> GetByName([FromQuery] string name)
+    {
+        try
         {
-
-            try
-            {
-                var course = await _queryService.GetByNameAsync(name);
-                return Ok(course);
-            }
-            catch (NotFoundCourse ex)
-            {
-                return NotFound(ex.Message);
-            }
-
+            var course = await _mediator.Send(new GetCourseByNameQuery(name));
+            return Ok(course);
         }
-
-        public override async Task<ActionResult<DtoCourseView>> GetById([FromQuery] string id)
+        catch (NotFoundCourse ex)
         {
-
-            try
-            {
-                var course = await _queryService.GetById(id);
-                return Ok(course);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
-
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<Course>> CreateCourse(CreateRequestCourse request)
+    public override async Task<ActionResult<DtoCourseView>> GetById([FromQuery] string id)
+    {
+        try
         {
-            try
-            {
-                var course = await _commandService.Create(request);
-                return Ok(course);
-            }
-            catch (InvalidName ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var course = await _mediator.Send(new GetCourseByIdQuery(id));
+            return Ok(course);
         }
-
-        public override async Task<ActionResult<Course>> UpdateCourse([FromQuery] string id, UpdateRequestCourse request)
+        catch (ItemDoesNotExist ex)
         {
-            try
-            {
-                var course = await _commandService.Update(id, request);
-                return Ok(course);
-            }
-            catch (InvalidName ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        public override async Task<ActionResult<Course>> DeleteCourse([FromQuery] string id)
+    public override async Task<ActionResult<Course>> CreateCourse(CreateRequestCourse request)
+    {
+        try
         {
-            try
-            {
-                var course = await _commandService.Delete(id);
-                return Ok(course);
-            }
-            catch (ItemDoesNotExist ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var course = await _mediator.Send(new CreateCourseCommand(request));
+            return Ok(course);
+        }
+        catch (InvalidName ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
+    public override async Task<ActionResult<Course>> UpdateCourse([FromQuery] string id, UpdateRequestCourse request)
+    {
+        try
+        {
+            var course = await _mediator.Send(new UpdateCourseCommand(id, request));
+            return Ok(course);
+        }
+        catch (InvalidName ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
+    public override async Task<ActionResult<Course>> DeleteCourse([FromQuery] string id)
+    {
+        try
+        {
+            var course = await _mediator.Send(new DeleteCourseCommand(id));
+            return Ok(course);
+        }
+        catch (ItemDoesNotExist ex)
+        {
+            return NotFound(ex.Message);
         }
     }
 }

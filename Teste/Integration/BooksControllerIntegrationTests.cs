@@ -39,6 +39,13 @@ public class BooksControllerIntegrationTests : IClassFixture<CustomWebApplicatio
     }
 
     [Fact]
+    public async Task GetById_ReturnsNotFound_ForMissing()
+    {
+        var resp = await _client.GetAsync("/api/v1/ControllerBook/findById?id=missing");
+        Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    [Fact]
     public async Task GetByName_ReturnsOk_ForSeeded()
     {
         var resp = await _client.GetAsync("/api/v1/ControllerBook/findByName?name=Algebra%20Basics");
